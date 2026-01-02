@@ -23,8 +23,8 @@ import { useTranslation } from 'react-i18next';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useNotifications } from '../../contexts/NotificationContext';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import LanguageIcon from '@mui/icons-material/Language';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -243,8 +243,16 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
           </Menu>
 
           <Tooltip title={t('header.switchTo', { mode: mode === 'light' ? 'dark' : 'light' })}>
-            <IconButton onClick={toggleMode} color="inherit">
-              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            <IconButton 
+              onClick={toggleMode} 
+              color="inherit"
+              sx={{
+                '&:hover': {
+                  bgcolor: 'rgba(255, 255, 255, 0.1)',
+                },
+              }}
+            >
+              {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
             </IconButton>
           </Tooltip>
 
