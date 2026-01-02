@@ -73,8 +73,41 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
     
     try {
       setLoading(true);
-      const cats = await db.getCategories();
-      setCategories(cats || []);
+      
+      // Get categories from categories store
+      const categoriesFromStore = await db.getCategories();
+      
+      // Get all unique categories from existing costs
+      const allCosts = await db.getAllCosts();
+      const costCategories = Array.from(new Set(allCosts.map(c => c.category)));
+      
+      // Create a map to combine categories from both sources
+      const categoryMap = new Map<string, Category>();
+      
+      // Add categories from store (with their colors)
+      categoriesFromStore.forEach(function(cat) {
+        categoryMap.set(cat.name, cat);
+      });
+      
+      // Add categories from costs (if not already in map)
+      costCategories.forEach(function(catName) {
+        if (!categoryMap.has(catName)) {
+          categoryMap.set(catName, {
+            name: catName,
+            color: '#6366f1' // Default color for categories from costs
+          });
+        }
+      });
+      
+      // Convert map to array
+      const allCategories = Array.from(categoryMap.values());
+      
+      // Sort by name
+      allCategories.sort(function(a, b) {
+        return a.name.localeCompare(b.name);
+      });
+      
+      setCategories(allCategories);
     } catch (error) {
       console.error('Failed to load categories:', error);
       toast.error('Failed to load categories: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -111,11 +144,29 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
 
     try {
       if (editingCategory) {
-        await db.updateCategory(editingCategory.id!, { name: categoryName.trim(), color: categoryColor });
-        toast.success('Category updated successfully');
+        // Check if this category exists in the store (has an id)
+        if (editingCategory.id) {
+          await db.updateCategory(editingCategory.id, { name: categoryName.trim(), color: categoryColor });
+          toast.success('Category updated successfully');
+        } else {
+          // Category from costs, add it to store
+          await db.addCategory({ name: categoryName.trim(), color: categoryColor });
+          toast.success('Category added successfully');
+        }
       } else {
-        await db.addCategory({ name: categoryName.trim(), color: categoryColor });
-        toast.success('Category added successfully');
+        // Check if category already exists in store
+        const existingCategories = await db.getCategories();
+        const existing = existingCategories.find(c => c.name === categoryName.trim());
+        
+        if (existing) {
+          // Update existing category
+          await db.updateCategory(existing.id!, { name: categoryName.trim(), color: categoryColor });
+          toast.success('Category updated successfully');
+        } else {
+          // Add new category
+          await db.addCategory({ name: categoryName.trim(), color: categoryColor });
+          toast.success('Category added successfully');
+        }
       }
       handleCloseDialog();
       loadCategories();
@@ -133,8 +184,17 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
     if (!db || !categoryToDelete) return;
 
     try {
-      await db.deleteCategory(categoryToDelete.id!);
-      toast.success('Category deleted successfully');
+      // Only delete if category exists in store (has an id)
+      if (categoryToDelete.id) {
+        await db.deleteCategory(categoryToDelete.id);
+        toast.success('Category deleted successfully');
+      } else {
+        // Category from costs, can't delete it from store (doesn't exist there)
+        toast('This category is used in expenses and cannot be deleted. You can only delete categories created in this page.', {
+          icon: 'ℹ️',
+          duration: 4000
+        });
+      }
       setDeleteDialogOpen(false);
       setCategoryToDelete(null);
       loadCategories();
