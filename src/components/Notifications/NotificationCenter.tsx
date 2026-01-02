@@ -1,0 +1,167 @@
+/**
+ * NotificationCenter.tsx - Notification center component
+ */
+
+import React from 'react';
+import {
+  Box,
+  Typography,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  IconButton,
+  Button,
+  Chip
+} from '@mui/material';
+import { useNotifications } from '../../contexts/NotificationContext';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import DeleteIcon from '@mui/icons-material/Delete';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import { format } from 'date-fns';
+
+/**
+ * NotificationCenter component
+ */
+export default function NotificationCenter(): JSX.Element {
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    clearNotification,
+    clearAll,
+  } = useNotifications();
+
+  const unreadNotifications = notifications.filter(n => !n.read);
+  const readNotifications = notifications.filter(n => n.read);
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography variant="h4" sx={{ fontWeight: 700 }}>
+          Notifications
+        </Typography>
+        {unreadCount > 0 && (
+          <Button onClick={markAllAsRead} variant="outlined" size="small">
+            Mark all as read
+          </Button>
+        )}
+        {notifications.length > 0 && (
+          <Button onClick={clearAll} variant="outlined" color="error" size="small">
+            Clear all
+          </Button>
+        )}
+      </Box>
+
+      {notifications.length === 0 ? (
+        <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 3, bgcolor: 'background.paper' }}>
+          <NotificationsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
+          <Typography variant="h6" gutterBottom>
+            No notifications
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            You're all caught up!
+          </Typography>
+        </Paper>
+      ) : (
+        <>
+          {unreadNotifications.length > 0 && (
+            <Box sx={{ mb: 3 }}>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                Unread ({unreadNotifications.length})
+              </Typography>
+              <List>
+                {unreadNotifications.map((notification) => (
+                  <Paper key={notification.id} sx={{ mb: 2, borderRadius: 2, bgcolor: 'background.paper' }}>
+                    <ListItem
+                      secondaryAction={
+                        <Box>
+                          <IconButton
+                            edge="end"
+                            onClick={() => markAsRead(notification.id)}
+                            size="small"
+                          >
+                            <CheckCircleIcon />
+                          </IconButton>
+                          <IconButton
+                            edge="end"
+                            onClick={() => clearNotification(notification.id)}
+                            size="small"
+                            color="error"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Box>
+                      }
+                    >
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                              {notification.message}
+                            </Typography>
+                            <Chip
+                              label={notification.type === 'budget_exceeded' ? 'Exceeded' : 'Warning'}
+                              size="small"
+                              color={notification.type === 'budget_exceeded' ? 'error' : 'warning'}
+                            />
+                          </Box>
+                        }
+                        secondary={format(notification.timestamp, 'PPp')}
+                      />
+                    </ListItem>
+                  </Paper>
+                ))}
+              </List>
+            </Box>
+          )}
+
+          {readNotifications.length > 0 && (
+            <Box>
+              <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+                Read ({readNotifications.length})
+              </Typography>
+              <List>
+                {readNotifications.map((notification) => (
+                  <Paper key={notification.id} sx={{ mb: 2, borderRadius: 2, opacity: 0.7, bgcolor: 'background.paper' }}>
+                    <ListItem
+                      secondaryAction={
+                        <IconButton
+                          edge="end"
+                          onClick={() => clearNotification(notification.id)}
+                          size="small"
+                          color="error"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      }
+                    >
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Typography variant="body1">
+                              {notification.message}
+                            </Typography>
+                            <Chip
+                              label={notification.type === 'budget_exceeded' ? 'Exceeded' : 'Warning'}
+                              size="small"
+                              color={notification.type === 'budget_exceeded' ? 'error' : 'warning'}
+                              variant="outlined"
+                            />
+                          </Box>
+                        }
+                        secondary={format(notification.timestamp, 'PPp')}
+                      />
+                    </ListItem>
+                  </Paper>
+                ))}
+              </List>
+            </Box>
+          )}
+        </>
+      )}
+    </Box>
+  );
+}
+
