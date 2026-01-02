@@ -5,6 +5,8 @@
 import React, { useState, useEffect } from 'react';
 import { CssBaseline, Alert, Fade } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import './i18n/config';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { NotificationProvider, useNotifications } from './contexts/NotificationContext';
 import { openCostsDB } from './lib/idb-react';
@@ -24,6 +26,7 @@ import NotificationCenter from './components/Notifications/NotificationCenter';
  * Main App component (inner component with notifications)
  */
 function AppInner() {
+  const { t } = useTranslation();
   const [db, setDb] = useState(null);
   const [dbError, setDbError] = useState('');
   const [currentView, setCurrentView] = useState('dashboard');
@@ -39,7 +42,7 @@ function AppInner() {
         setDb(database);
         setDbError('');
       } catch (error) {
-        setDbError('Failed to initialize database: ' + (error instanceof Error ? error.message : 'Unknown error'));
+        setDbError(t('messages.failedToInitialize') + ': ' + (error instanceof Error ? error.message : 'Unknown error'));
       }
     }
 

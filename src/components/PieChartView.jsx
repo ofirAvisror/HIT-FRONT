@@ -19,6 +19,7 @@ import {
   CardContent,
   Fade
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 import { getPieChartData } from '../lib/chartHelpers';
 import { motion } from 'framer-motion';
@@ -30,6 +31,7 @@ import { motion } from 'framer-motion';
  * @param {Object|null} props.db - Database instance
  */
 export default function PieChartView({ db }) {
+  const { t } = useTranslation();
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [currency, setCurrency] = useState('USD');
@@ -47,7 +49,7 @@ export default function PieChartView({ db }) {
    */
   const handleGetChart = async function() {
     if (!db) {
-      setErrorMessage('Database not initialized');
+      setErrorMessage(t('messages.databaseNotInitialized'));
       return;
     }
 
@@ -59,15 +61,16 @@ export default function PieChartView({ db }) {
       const data = await getPieChartData(year, month, currency, db);
       setChartData(data);
     } catch (error) {
-      setErrorMessage('Failed to get chart data: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      setErrorMessage(t('messages.failedToGet') + ' chart data: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
   };
 
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    t('months.january'), t('months.february'), t('months.march'), t('months.april'), 
+    t('months.may'), t('months.june'), t('months.july'), t('months.august'), 
+    t('months.september'), t('months.october'), t('months.november'), t('months.december')
   ];
 
   return (
@@ -83,7 +86,7 @@ export default function PieChartView({ db }) {
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-            🥧 Costs by Category
+            {t('charts.costsByCategory')}
           </Typography>
         </Box>
 
@@ -115,7 +118,7 @@ export default function PieChartView({ db }) {
         >
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <TextField
-          label="Year"
+          label={t('common.year')}
           type="number"
           value={year}
           onChange={(e) => setYear(parseInt(e.target.value) || new Date().getFullYear())}
@@ -123,10 +126,10 @@ export default function PieChartView({ db }) {
         />
 
         <FormControl sx={{ minWidth: 150 }}>
-          <InputLabel>Month</InputLabel>
+          <InputLabel>{t('common.month')}</InputLabel>
           <Select
             value={month}
-            label="Month"
+            label={t('common.month')}
             onChange={(e) => setMonth(e.target.value)}
           >
             {monthNames.map((name, index) => (
@@ -138,10 +141,10 @@ export default function PieChartView({ db }) {
         </FormControl>
 
         <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Currency</InputLabel>
+          <InputLabel>{t('common.currency')}</InputLabel>
           <Select
             value={currency}
-            label="Currency"
+            label={t('common.currency')}
             onChange={(e) => setCurrency(e.target.value)}
           >
             <MenuItem value="USD">USD</MenuItem>
@@ -169,7 +172,7 @@ export default function PieChartView({ db }) {
                 transition: 'all 0.3s ease',
               }}
             >
-              {loading ? 'Loading...' : 'Get Chart'}
+              {loading ? t('common.loading') : t('charts.getChart')}
             </Button>
           </Box>
         </Paper>
@@ -245,7 +248,7 @@ export default function PieChartView({ db }) {
             }}
           >
             <Typography variant="body1" color="text.secondary">
-              Click "Get Chart" to generate a pie chart for the selected month and year.
+              {t('charts.clickGetChart')}
             </Typography>
           </Paper>
         )}

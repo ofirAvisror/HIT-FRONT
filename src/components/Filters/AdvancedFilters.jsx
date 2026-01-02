@@ -24,6 +24,7 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import toast from 'react-hot-toast';
@@ -34,6 +35,7 @@ import toast from 'react-hot-toast';
  * @param {Object|null} props.db - Database instance
  */
 export default function AdvancedFilters({ db }) {
+  const { t } = useTranslation();
   const [startDate, setStartDate] = useState(function() {
     const date = new Date();
     return { year: date.getFullYear(), month: date.getMonth() + 1, day: 1 };
@@ -65,13 +67,13 @@ export default function AdvancedFilters({ db }) {
       const uniqueCategories = Array.from(new Set(allCosts.map(c => c.category)));
       setCategories(uniqueCategories);
     } catch (error) {
-      toast.error('Failed to load categories');
+      toast.error(t('messages.failedToLoad') + ' categories');
     }
   };
 
   const handleApplyFilters = async function() {
     if (!db) {
-      toast.error('Database not initialized');
+      toast.error(t('messages.databaseNotInitialized'));
       return;
     }
 
@@ -105,9 +107,9 @@ export default function AdvancedFilters({ db }) {
       filtered = filtered.filter(c => c.currency === currency);
       
       setFilteredCosts(filtered);
-      toast.success(`Found ${filtered.length} results`);
+      toast.success(t('messages.foundResults', { count: filtered.length }));
     } catch (error) {
-      toast.error('Failed to apply filters');
+      toast.error(t('messages.failedToApply'));
     } finally {
       setLoading(false);
     }
@@ -129,25 +131,25 @@ export default function AdvancedFilters({ db }) {
   return (
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
-        Advanced Filters
+        {t('filters.title')}
       </Typography>
 
       <Paper sx={{ p: 3, mb: 4, borderRadius: 3, boxShadow: 2, bgcolor: 'background.paper' }}>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              Start Date
+              {t('common.startDate')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <TextField
-                label="Year"
+                label={t('common.year')}
                 type="number"
                 value={startDate.year}
                 onChange={(e) => setStartDate({ ...startDate, year: parseInt(e.target.value) || 2024 })}
                 size="small"
               />
               <TextField
-                label="Month"
+                label={t('common.month')}
                 type="number"
                 value={startDate.month}
                 onChange={(e) => setStartDate({ ...startDate, month: parseInt(e.target.value) || 1 })}
@@ -155,7 +157,7 @@ export default function AdvancedFilters({ db }) {
                 inputProps={{ min: 1, max: 12 }}
               />
               <TextField
-                label="Day"
+                label={t('common.day')}
                 type="number"
                 value={startDate.day}
                 onChange={(e) => setStartDate({ ...startDate, day: parseInt(e.target.value) || 1 })}
@@ -167,18 +169,18 @@ export default function AdvancedFilters({ db }) {
 
           <Grid item xs={12} md={6}>
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              End Date
+              {t('common.endDate')}
             </Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <TextField
-                label="Year"
+                label={t('common.year')}
                 type="number"
                 value={endDate.year}
                 onChange={(e) => setEndDate({ ...endDate, year: parseInt(e.target.value) || 2024 })}
                 size="small"
               />
               <TextField
-                label="Month"
+                label={t('common.month')}
                 type="number"
                 value={endDate.month}
                 onChange={(e) => setEndDate({ ...endDate, month: parseInt(e.target.value) || 1 })}
@@ -186,7 +188,7 @@ export default function AdvancedFilters({ db }) {
                 inputProps={{ min: 1, max: 12 }}
               />
               <TextField
-                label="Day"
+                label={t('common.day')}
                 type="number"
                 value={endDate.day}
                 onChange={(e) => setEndDate({ ...endDate, day: parseInt(e.target.value) || 1 })}
@@ -198,7 +200,7 @@ export default function AdvancedFilters({ db }) {
 
           <Grid item xs={12} md={6}>
             <FormControl fullWidth size="small">
-              <InputLabel>Categories</InputLabel>
+              <InputLabel>{t('common.category')}</InputLabel>
               <Select
                 multiple
                 value={selectedCategories}
@@ -222,7 +224,7 @@ export default function AdvancedFilters({ db }) {
 
           <Grid item xs={12} md={3}>
             <TextField
-              label="Min Amount"
+              label={t('common.minAmount')}
               type="number"
               value={minAmount}
               onChange={(e) => setMinAmount(e.target.value)}
@@ -233,7 +235,7 @@ export default function AdvancedFilters({ db }) {
 
           <Grid item xs={12} md={3}>
             <TextField
-              label="Max Amount"
+              label={t('common.maxAmount')}
               type="number"
               value={maxAmount}
               onChange={(e) => setMaxAmount(e.target.value)}
@@ -244,7 +246,7 @@ export default function AdvancedFilters({ db }) {
 
           <Grid item xs={12} md={6}>
             <FormControl fullWidth size="small">
-              <InputLabel>Currency</InputLabel>
+              <InputLabel>{t('common.currency')}</InputLabel>
               <Select value={currency} onChange={(e) => setCurrency(e.target.value)}>
                 <MenuItem value="USD">USD</MenuItem>
                 <MenuItem value="ILS">ILS</MenuItem>
@@ -265,14 +267,14 @@ export default function AdvancedFilters({ db }) {
                   background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 }}
               >
-                Apply Filters
+                {t('filters.applyFilters')}
               </Button>
               <Button
                 variant="outlined"
                 startIcon={<ClearIcon />}
                 onClick={handleReset}
               >
-                Reset
+                {t('common.reset')}
               </Button>
             </Box>
           </Grid>
@@ -284,10 +286,10 @@ export default function AdvancedFilters({ db }) {
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                Filtered Results ({filteredCosts.length} items)
+                {t('filters.filteredResults', { count: filteredCosts.length })}
               </Typography>
               <Typography variant="h6" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                Total: {totalAmount.toFixed(2)} {currency}
+                {t('filters.total', { amount: totalAmount.toFixed(2), currency: currency })}
               </Typography>
             </Box>
             
@@ -295,11 +297,11 @@ export default function AdvancedFilters({ db }) {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Date</TableCell>
-                    <TableCell>Category</TableCell>
-                    <TableCell>Description</TableCell>
-                    <TableCell align="right">Amount</TableCell>
-                    <TableCell>Currency</TableCell>
+                    <TableCell>{t('common.date')}</TableCell>
+                    <TableCell>{t('common.category')}</TableCell>
+                    <TableCell>{t('common.description')}</TableCell>
+                    <TableCell align="right">{t('common.amount')}</TableCell>
+                    <TableCell>{t('common.currency')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>

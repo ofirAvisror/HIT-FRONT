@@ -21,6 +21,7 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import AddIcon from '@mui/icons-material/Add';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import BudgetCard from './BudgetCard';
@@ -32,6 +33,7 @@ import toast from 'react-hot-toast';
  * @param {Object|null} props.db - Database instance
  */
 export default function BudgetManager({ db }) {
+  const { t } = useTranslation();
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
@@ -68,7 +70,7 @@ export default function BudgetManager({ db }) {
       setBudgets(budgetsList || []);
     } catch (error) {
       console.error('Failed to load budgets:', error);
-      toast.error('Failed to load budgets: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      toast.error(t('messages.failedToLoad') + ' budgets: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -141,13 +143,13 @@ export default function BudgetManager({ db }) {
 
   const handleSave = async function() {
     if (!db || !amount) {
-      toast.error('Please enter an amount');
+      toast.error(t('messages.pleaseEnterAmount'));
       return;
     }
 
     const amountValue = parseFloat(amount);
     if (isNaN(amountValue) || amountValue <= 0) {
-      toast.error('Please enter a valid amount');
+      toast.error(t('messages.pleaseEnterValidAmount'));
       return;
     }
 
@@ -162,18 +164,18 @@ export default function BudgetManager({ db }) {
       };
 
       await db.setBudget(budgetData);
-      toast.success('Budget saved successfully');
+      toast.success(t('messages.budgetSaved'));
       handleCloseDialog();
       loadBudgets();
     } catch (error) {
-      toast.error('Failed to save budget');
+      toast.error(t('messages.failedToSave') + ' budget');
     }
   };
 
   if (!db) {
     return (
       <Alert severity="info">
-        Database not initialized
+        {t('messages.databaseNotInitialized')}
       </Alert>
     );
   }
@@ -190,7 +192,7 @@ export default function BudgetManager({ db }) {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Budget Management
+          {t('budget.title')}
         </Typography>
         <Button
           variant="contained"
@@ -203,7 +205,7 @@ export default function BudgetManager({ db }) {
             },
           }}
         >
-          Add Budget
+          {t('budget.addBudget')}
         </Button>
       </Box>
 
@@ -211,13 +213,13 @@ export default function BudgetManager({ db }) {
         <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 3, bgcolor: 'background.paper' }}>
           <AccountBalanceIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h6" gutterBottom>
-            No budgets set
+            {t('messages.noBudgetsSet')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Create a budget to track your spending
+            {t('messages.createBudget')}
           </Typography>
           <Button variant="contained" onClick={handleOpenDialog}>
-            Create Budget
+            {t('messages.createBudget')}
           </Button>
         </Paper>
       ) : (
@@ -235,25 +237,25 @@ export default function BudgetManager({ db }) {
 
       {/* Add Budget Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>Add New Budget</DialogTitle>
+        <DialogTitle>{t('budget.addNewBudget')}</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
             <FormControl fullWidth margin="normal">
-              <InputLabel>Budget Type</InputLabel>
+              <InputLabel>{t('forms.budgetType')}</InputLabel>
               <Select
                 value={budgetType}
                 onChange={(e) => setBudgetType(e.target.value)}
               >
-                <MenuItem value="monthly">Monthly</MenuItem>
-                <MenuItem value="yearly">Yearly</MenuItem>
-                <MenuItem value="category">By Category</MenuItem>
+                <MenuItem value="monthly">{t('forms.monthly')}</MenuItem>
+                <MenuItem value="yearly">{t('forms.yearly')}</MenuItem>
+                <MenuItem value="category">{t('forms.byCategory')}</MenuItem>
               </Select>
             </FormControl>
 
             {budgetType === 'monthly' && (
               <>
                 <TextField
-                  label="Year"
+                  label={t('common.year')}
                   type="number"
                   value={year}
                   onChange={(e) => setYear(parseInt(e.target.value) || new Date().getFullYear())}
@@ -261,7 +263,7 @@ export default function BudgetManager({ db }) {
                   margin="normal"
                 />
                 <TextField
-                  label="Month"
+                  label={t('common.month')}
                   type="number"
                   value={month}
                   onChange={(e) => setMonth(parseInt(e.target.value) || 1)}
@@ -274,7 +276,7 @@ export default function BudgetManager({ db }) {
 
             {budgetType === 'yearly' && (
               <TextField
-                label="Year"
+                label={t('common.year')}
                 type="number"
                 value={year}
                 onChange={(e) => setYear(parseInt(e.target.value) || new Date().getFullYear())}
@@ -285,7 +287,7 @@ export default function BudgetManager({ db }) {
 
             {budgetType === 'category' && (
               <FormControl fullWidth margin="normal">
-                <InputLabel>Category</InputLabel>
+                <InputLabel>{t('common.category')}</InputLabel>
                 <Select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
@@ -300,7 +302,7 @@ export default function BudgetManager({ db }) {
             )}
 
             <TextField
-              label="Amount"
+              label={t('common.amount')}
               type="number"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -311,7 +313,7 @@ export default function BudgetManager({ db }) {
             />
 
             <FormControl fullWidth margin="normal">
-              <InputLabel>Currency</InputLabel>
+              <InputLabel>{t('common.currency')}</InputLabel>
               <Select value={currency} onChange={(e) => setCurrency(e.target.value)}>
                 <MenuItem value="USD">USD</MenuItem>
                 <MenuItem value="ILS">ILS</MenuItem>
@@ -322,9 +324,9 @@ export default function BudgetManager({ db }) {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog}>{t('common.cancel')}</Button>
           <Button onClick={handleSave} variant="contained">
-            Save
+            {t('common.save')}
           </Button>
         </DialogActions>
       </Dialog>

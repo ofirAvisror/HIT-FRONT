@@ -3,6 +3,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import i18n from '../i18n/config';
 
 const NotificationContext = createContext(undefined);
 
@@ -93,7 +94,11 @@ export function NotificationProvider({ children }) {
             newNotifications.push({
               id: `budget-exceeded-${budget.id}`,
               type: 'budget_exceeded',
-              message: `Budget exceeded! You've spent ${spent.toFixed(2)} ${budget.currency} out of ${budget.amount.toFixed(2)} ${budget.currency}`,
+              message: i18n.t('notifications.budgetExceeded', { 
+                spent: spent.toFixed(2), 
+                currency: budget.currency, 
+                amount: budget.amount.toFixed(2) 
+              }),
               timestamp: new Date(),
               read: false,
             });
@@ -101,7 +106,7 @@ export function NotificationProvider({ children }) {
             newNotifications.push({
               id: `budget-warning-${budget.id}`,
               type: 'budget_warning',
-              message: `Budget warning: You've used ${percentage.toFixed(1)}% of your budget`,
+              message: i18n.t('notifications.budgetWarning', { percentage: percentage.toFixed(1) }),
               timestamp: new Date(),
               read: false,
             });

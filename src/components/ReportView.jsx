@@ -24,6 +24,7 @@ import {
   Chip,
   Fade
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import ExportDialog from './Export/ExportDialog';
 import toast from 'react-hot-toast';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
@@ -35,6 +36,7 @@ import FileDownloadIcon from '@mui/icons-material/FileDownload';
  * @param {Object|null} props.db - Database instance
  */
 export default function ReportView({ db }) {
+  const { t } = useTranslation();
   const [year, setYear] = useState(new Date().getFullYear());
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [currency, setCurrency] = useState('USD');
@@ -47,7 +49,7 @@ export default function ReportView({ db }) {
    */
   const handleGetReport = async function() {
     if (!db) {
-      toast.error('Database not initialized');
+      toast.error(t('messages.databaseNotInitialized'));
       return;
     }
 
@@ -57,17 +59,18 @@ export default function ReportView({ db }) {
     try {
       const result = await db.getReport(year, month, currency);
       setReport(result);
-      toast.success('Report generated successfully');
+      toast.success(t('messages.reportGenerated'));
     } catch (error) {
-      toast.error('Failed to get report: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      toast.error(t('messages.failedToGet') + ' report: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
   };
 
   const monthNames = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    t('months.january'), t('months.february'), t('months.march'), t('months.april'), 
+    t('months.may'), t('months.june'), t('months.july'), t('months.august'), 
+    t('months.september'), t('months.october'), t('months.november'), t('months.december')
   ];
 
   return (
@@ -83,7 +86,7 @@ export default function ReportView({ db }) {
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-            📊 Monthly Report
+            {t('report.title')}
           </Typography>
         </Box>
 
@@ -100,7 +103,7 @@ export default function ReportView({ db }) {
         >
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <TextField
-          label="Year"
+          label={t('common.year')}
           type="number"
           value={year}
           onChange={(e) => setYear(parseInt(e.target.value) || new Date().getFullYear())}
@@ -108,10 +111,10 @@ export default function ReportView({ db }) {
         />
 
         <FormControl sx={{ minWidth: 150 }}>
-          <InputLabel>Month</InputLabel>
+          <InputLabel>{t('common.month')}</InputLabel>
           <Select
             value={month}
-            label="Month"
+            label={t('common.month')}
             onChange={(e) => setMonth(e.target.value)}
           >
             {monthNames.map((name, index) => (
@@ -123,10 +126,10 @@ export default function ReportView({ db }) {
         </FormControl>
 
         <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel>Currency</InputLabel>
+          <InputLabel>{t('common.currency')}</InputLabel>
           <Select
             value={currency}
-            label="Currency"
+            label={t('common.currency')}
             onChange={(e) => setCurrency(e.target.value)}
           >
             <MenuItem value="USD">USD</MenuItem>
@@ -154,7 +157,7 @@ export default function ReportView({ db }) {
                 transition: 'all 0.3s ease',
               }}
             >
-              {loading ? 'Loading...' : 'Get Report'}
+              {loading ? t('common.loading') : t('report.getReport')}
             </Button>
           </Box>
         </Paper>
@@ -164,11 +167,11 @@ export default function ReportView({ db }) {
             <Box>
               <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
                 <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary' }}>
-                  Report for {monthNames[month - 1]} {year}
+                  {t('report.reportFor', { month: monthNames[month - 1], year: year })}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <Chip 
-                    label={`${report.costs.length} items`}
+                    label={`${report.costs.length} ${t('common.items')}`}
                     color="primary"
                     sx={{ fontWeight: 600 }}
                   />
@@ -178,7 +181,7 @@ export default function ReportView({ db }) {
                     onClick={() => setExportDialogOpen(true)}
                     size="small"
                   >
-                    Export
+                    {t('common.export')}
                   </Button>
                 </Box>
               </Box>
@@ -196,7 +199,7 @@ export default function ReportView({ db }) {
                   }}
                 >
                   <Typography variant="body1" color="text.secondary">
-                    No costs found for this month.
+                    {t('messages.noCostsFound')}
                   </Typography>
                 </Paper>
               ) : (
@@ -215,11 +218,11 @@ export default function ReportView({ db }) {
                     <Table>
                       <TableHead>
                         <TableRow sx={{ bgcolor: 'primary.main' }}>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Day</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Sum</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Currency</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Category</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>Description</TableCell>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.day')}</TableCell>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.sum')}</TableCell>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.currency')}</TableCell>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.category')}</TableCell>
+                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.description')}</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -260,7 +263,7 @@ export default function ReportView({ db }) {
                   >
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                       <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
-                        Total Amount
+                        {t('report.totalAmount')}
                       </Typography>
                       <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
                         {report.total.total.toFixed(2)} {report.total.currency}

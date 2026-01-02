@@ -16,6 +16,7 @@ import {
   useMediaQuery,
   useTheme as useMUITheme
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -29,18 +30,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 
 const drawerWidth = 280;
 
-const navItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
-  { id: 'add-cost', label: 'Add Cost', icon: <AddCircleOutlineIcon /> },
-  { id: 'report', label: 'Report', icon: <AssessmentIcon /> },
-  { id: 'pie-chart', label: 'Pie Chart', icon: <PieChartIcon /> },
-  { id: 'bar-chart', label: 'Bar Chart', icon: <BarChartIcon /> },
-  { id: 'categories', label: 'Categories', icon: <CategoryIcon /> },
-  { id: 'budget', label: 'Budget', icon: <AccountBalanceIcon /> },
-  { id: 'filters', label: 'Filters', icon: <FilterListIcon /> },
-  { id: 'notifications', label: 'Notifications', icon: <NotificationsIcon /> },
-  { id: 'settings', label: 'Settings', icon: <SettingsIcon /> },
-];
+// Navigation items will be created inside component to use translation
 
 /**
  * Sidebar component
@@ -51,8 +41,22 @@ const navItems = [
  * @param {function} props.onViewChange - Function to change view
  */
 export default function Sidebar({ open, onClose, currentView, onViewChange }) {
+  const { t } = useTranslation();
   const muiTheme = useMUITheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
+
+  const navItems = [
+    { id: 'dashboard', label: t('navigation.dashboard'), icon: <DashboardIcon /> },
+    { id: 'add-cost', label: t('navigation.addCost'), icon: <AddCircleOutlineIcon /> },
+    { id: 'report', label: t('navigation.report'), icon: <AssessmentIcon /> },
+    { id: 'pie-chart', label: t('navigation.pieChart'), icon: <PieChartIcon /> },
+    { id: 'bar-chart', label: t('navigation.barChart'), icon: <BarChartIcon /> },
+    { id: 'categories', label: t('navigation.categories'), icon: <CategoryIcon /> },
+    { id: 'budget', label: t('navigation.budget'), icon: <AccountBalanceIcon /> },
+    { id: 'filters', label: t('navigation.filters'), icon: <FilterListIcon /> },
+    { id: 'notifications', label: t('navigation.notifications'), icon: <NotificationsIcon /> },
+    { id: 'settings', label: t('navigation.settings'), icon: <SettingsIcon /> },
+  ];
 
   const handleItemClick = function(itemId) {
     onViewChange(itemId);
@@ -65,10 +69,10 @@ export default function Sidebar({ open, onClose, currentView, onViewChange }) {
     <Box>
       <Box sx={{ p: 3, bgcolor: 'primary.main', color: 'primary.contrastText' }}>
         <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          💰 Cost Manager
+          💰 {t('common.costManager')}
         </Typography>
         <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
-          Manage your expenses
+          {t('common.manageExpenses')}
         </Typography>
       </Box>
       

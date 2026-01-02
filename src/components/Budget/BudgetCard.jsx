@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { Card, CardContent, Typography, Box, LinearProgress, Chip } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 
 /**
  * BudgetCard component
@@ -12,17 +13,18 @@ import { Card, CardContent, Typography, Box, LinearProgress, Chip } from '@mui/m
  * @param {number} props.spent - Amount spent
  */
 export default function BudgetCard({ budget, spent }) {
+  const { t } = useTranslation();
   const percentage = (spent / budget.amount) * 100;
   const remaining = budget.amount - spent;
   const isOverBudget = spent > budget.amount;
 
   const getBudgetTypeLabel = function() {
     if (budget.type === 'monthly') {
-      return `Monthly (${budget.month}/${budget.year})`;
+      return t('budget.monthlyLabel', { month: budget.month, year: budget.year });
     } else if (budget.type === 'yearly') {
-      return `Yearly (${budget.year})`;
+      return t('budget.yearlyLabel', { year: budget.year });
     } else {
-      return `Category: ${budget.category}`;
+      return t('budget.categoryLabel', { category: budget.category });
     }
   };
 
@@ -49,7 +51,7 @@ export default function BudgetCard({ budget, spent }) {
         <Box sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
             <Typography variant="body2" color="text.secondary">
-              Spent
+              {t('budget.spent')}
             </Typography>
             <Typography 
               variant="body2" 
@@ -66,13 +68,13 @@ export default function BudgetCard({ budget, spent }) {
           />
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 1 }}>
             <Typography variant="caption" color="text.secondary">
-              {percentage.toFixed(1)}% used
+              {percentage.toFixed(1)}% {t('budget.used')}
             </Typography>
             <Typography 
               variant="caption" 
               sx={{ fontWeight: 600, color: remaining < 0 ? 'error.main' : 'success.main' }}
             >
-              {remaining >= 0 ? 'Remaining: ' : 'Over by: '}
+              {remaining >= 0 ? t('budget.remaining') + ': ' : t('budget.overBy') + ': '}
               {Math.abs(remaining).toFixed(2)} {budget.currency}
             </Typography>
           </Box>

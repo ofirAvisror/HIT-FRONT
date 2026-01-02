@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { Paper, Typography, Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 /**
@@ -13,12 +14,15 @@ import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tool
  * @param {string} props.currency - Currency code
  * @param {string} [props.title='Monthly Trends'] - Chart title
  */
-export default function LineChart({ data, currency, title = 'Monthly Trends' }) {
+export default function LineChart({ data, currency, title }) {
+  const { t } = useTranslation();
+  const chartTitle = title || t('charts.monthlyTrends');
+  
   return (
     <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 2, bgcolor: 'background.paper' }}>
-      {title && (
+      {chartTitle && (
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-          {title}
+          {chartTitle}
         </Typography>
       )}
       <Box sx={{ width: '100%', height: 400 }}>

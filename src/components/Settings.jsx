@@ -12,6 +12,7 @@ import {
   Card,
   CardContent
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
 /**
@@ -19,6 +20,7 @@ import toast from 'react-hot-toast';
  * Allows users to configure the exchange rate URL
  */
 export default function Settings() {
+  const { t } = useTranslation();
   const [exchangeRateUrl, setExchangeRateUrl] = useState('./exchange-rates.json');
 
   /**
@@ -36,7 +38,7 @@ export default function Settings() {
    */
   const handleSave = function() {
     localStorage.setItem('exchangeRateUrl', exchangeRateUrl);
-    toast.success('Settings saved successfully!');
+    toast.success(t('messages.settingsSaved'));
   };
 
   return (
@@ -52,7 +54,7 @@ export default function Settings() {
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-            ⚙️ Settings
+            {t('settings.title')}
           </Typography>
         </Box>
 
@@ -67,12 +69,12 @@ export default function Settings() {
           }}
         >
           <TextField
-            label="Exchange Rate URL"
+            label={t('settings.exchangeRateUrl')}
             value={exchangeRateUrl}
             onChange={(e) => setExchangeRateUrl(e.target.value)}
             fullWidth
             margin="normal"
-            helperText="URL to fetch currency exchange rates. Should return JSON with USD, GBP, EURO, and ILS rates."
+            helperText={t('settings.exchangeRateUrlHelper')}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
@@ -105,7 +107,7 @@ export default function Settings() {
               transition: 'all 0.3s ease',
             }}
           >
-            Save Settings
+            {t('settings.saveSettings')}
           </Button>
         </Paper>
       </CardContent>

@@ -14,6 +14,7 @@ import {
   Button,
   Chip
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { useNotifications } from '../../contexts/NotificationContext';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -24,6 +25,7 @@ import { format } from 'date-fns';
  * NotificationCenter component
  */
 export default function NotificationCenter() {
+  const { t } = useTranslation();
   const {
     notifications,
     unreadCount,
@@ -40,16 +42,16 @@ export default function NotificationCenter() {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Notifications
+          {t('notifications.title')}
         </Typography>
         {unreadCount > 0 && (
           <Button onClick={markAllAsRead} variant="outlined" size="small">
-            Mark all as read
+            {t('notifications.markAllAsRead')}
           </Button>
         )}
         {notifications.length > 0 && (
           <Button onClick={clearAll} variant="outlined" color="error" size="small">
-            Clear all
+            {t('notifications.clearAll')}
           </Button>
         )}
       </Box>
@@ -58,10 +60,10 @@ export default function NotificationCenter() {
         <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 3, bgcolor: 'background.paper' }}>
           <NotificationsIcon sx={{ fontSize: 64, color: 'text.secondary', mb: 2 }} />
           <Typography variant="h6" gutterBottom>
-            No notifications
+            {t('notifications.noNotifications')}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            You're all caught up!
+            {t('notifications.allCaughtUp')}
           </Typography>
         </Paper>
       ) : (
@@ -69,7 +71,7 @@ export default function NotificationCenter() {
           {unreadNotifications.length > 0 && (
             <Box sx={{ mb: 3 }}>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Unread ({unreadNotifications.length})
+                {t('notifications.unread', { count: unreadNotifications.length })}
               </Typography>
               <List>
                 {unreadNotifications.map((notification) => (
@@ -102,7 +104,7 @@ export default function NotificationCenter() {
                               {notification.message}
                             </Typography>
                             <Chip
-                              label={notification.type === 'budget_exceeded' ? 'Exceeded' : 'Warning'}
+                              label={notification.type === 'budget_exceeded' ? t('common.exceeded') : t('common.warning')}
                               size="small"
                               color={notification.type === 'budget_exceeded' ? 'error' : 'warning'}
                             />
@@ -120,7 +122,7 @@ export default function NotificationCenter() {
           {readNotifications.length > 0 && (
             <Box>
               <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
-                Read ({readNotifications.length})
+                {t('notifications.read', { count: readNotifications.length })}
               </Typography>
               <List>
                 {readNotifications.map((notification) => (
@@ -144,7 +146,7 @@ export default function NotificationCenter() {
                               {notification.message}
                             </Typography>
                             <Chip
-                              label={notification.type === 'budget_exceeded' ? 'Exceeded' : 'Warning'}
+                              label={notification.type === 'budget_exceeded' ? t('common.exceeded') : t('common.warning')}
                               size="small"
                               color={notification.type === 'budget_exceeded' ? 'error' : 'warning'}
                               variant="outlined"

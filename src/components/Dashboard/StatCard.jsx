@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { Card, CardContent, Typography, Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
@@ -17,6 +18,7 @@ import TrendingDownIcon from '@mui/icons-material/TrendingDown';
  * @param {string} [props.color='#6366f1'] - Card color
  */
 export default function StatCard({ title, value, change, icon, color = '#6366f1' }) {
+  const { t } = useTranslation();
   const isPositive = change !== undefined && change >= 0;
 
   return (
@@ -64,7 +66,7 @@ export default function StatCard({ title, value, change, icon, color = '#6366f1'
                 fontWeight: 600,
               }}
             >
-              {Math.abs(change).toFixed(1)}% {isPositive ? 'increase' : 'decrease'}
+              {Math.abs(change).toFixed(1)}% {isPositive ? t('dashboard.increase') : t('dashboard.decrease')}
             </Typography>
           </Box>
         )}

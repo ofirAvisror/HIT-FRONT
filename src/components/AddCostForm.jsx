@@ -16,6 +16,7 @@ import {
   CardContent,
   Autocomplete
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import toast from 'react-hot-toast';
 
 /**
@@ -25,6 +26,7 @@ import toast from 'react-hot-toast';
  * @param {Object|null} props.db - Database instance
  */
 export default function AddCostForm({ db }) {
+  const { t } = useTranslation();
   const [sum, setSum] = useState('');
   const [currency, setCurrency] = useState('USD');
   const [category, setCategory] = useState('');
@@ -73,24 +75,24 @@ export default function AddCostForm({ db }) {
     event.preventDefault();
     
     if (!db) {
-      toast.error('Database not initialized');
+      toast.error(t('messages.databaseNotInitialized'));
       return;
     }
 
     // Validate inputs
     const sumValue = parseFloat(sum);
     if (isNaN(sumValue) || sumValue <= 0) {
-      toast.error('Please enter a valid positive number for sum');
+      toast.error(t('forms.pleaseEnterValid') + ' ' + t('forms.positiveNumber'));
       return;
     }
 
     if (!category.trim()) {
-      toast.error('Please enter a category');
+      toast.error(t('messages.pleaseEnterCategory'));
       return;
     }
 
     if (!description.trim()) {
-      toast.error('Please enter a description');
+      toast.error(t('messages.pleaseEnterDescription'));
       return;
     }
 
@@ -120,9 +122,9 @@ export default function AddCostForm({ db }) {
         // Ignore errors
       }
       
-      toast.success('Cost item added successfully!');
+      toast.success(t('messages.costItemAdded'));
     } catch (error) {
-      toast.error('Failed to add cost item: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      toast.error(t('messages.failedToSave') + ' cost item: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   };
 
@@ -139,13 +141,13 @@ export default function AddCostForm({ db }) {
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
-            ➕ Add New Cost Item
+            {t('forms.addNewCostItem')}
           </Typography>
         </Box>
 
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
           <TextField
-            label="Sum"
+            label={t('common.sum')}
             type="number"
             value={sum}
             onChange={(e) => setSum(e.target.value)}
@@ -173,16 +175,16 @@ export default function AddCostForm({ db }) {
               },
             }}
           >
-            <InputLabel>Currency</InputLabel>
+            <InputLabel>{t('common.currency')}</InputLabel>
             <Select
               value={currency}
-              label="Currency"
+              label={t('common.currency')}
               onChange={(e) => setCurrency(e.target.value)}
             >
-              <MenuItem value="USD">USD - US Dollar</MenuItem>
-              <MenuItem value="ILS">ILS - Israeli Shekel</MenuItem>
-              <MenuItem value="GBP">GBP - British Pound</MenuItem>
-              <MenuItem value="EURO">EURO - Euro</MenuItem>
+              <MenuItem value="USD">{t('currency.usd')}</MenuItem>
+              <MenuItem value="ILS">{t('currency.ils')}</MenuItem>
+              <MenuItem value="GBP">{t('currency.gbp')}</MenuItem>
+              <MenuItem value="EURO">{t('currency.euro')}</MenuItem>
             </Select>
           </FormControl>
 
@@ -199,7 +201,7 @@ export default function AddCostForm({ db }) {
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Category"
+                label={t('common.category')}
                 required
                 margin="normal"
                 sx={{
@@ -215,7 +217,7 @@ export default function AddCostForm({ db }) {
           />
 
           <TextField
-            label="Description"
+            label={t('common.description')}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             fullWidth
@@ -256,7 +258,7 @@ export default function AddCostForm({ db }) {
             }}
             disabled={!db}
           >
-            Add Cost Item
+            {t('forms.addCostItem')}
           </Button>
         </Box>
       </CardContent>

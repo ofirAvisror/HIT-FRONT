@@ -19,6 +19,7 @@ import {
   FormGroup,
   FormControl
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { exportToCSV, exportToPDF } from '../../lib/exportHelpers';
 import toast from 'react-hot-toast';
 
@@ -30,6 +31,7 @@ import toast from 'react-hot-toast';
  * @param {Object|null} props.db - Database instance
  */
 export default function ExportDialog({ open, onClose, db }) {
+  const { t } = useTranslation();
   const [exportFormat, setExportFormat] = useState('csv');
   const [startDate, setStartDate] = useState(function() {
     const date = new Date();
@@ -43,11 +45,11 @@ export default function ExportDialog({ open, onClose, db }) {
   const [loading, setLoading] = useState(false);
 
   const columns = [
-    { id: 'date', label: 'Date' },
-    { id: 'category', label: 'Category' },
-    { id: 'description', label: 'Description' },
-    { id: 'amount', label: 'Amount' },
-    { id: 'currency', label: 'Currency' },
+    { id: 'date', label: t('common.date') },
+    { id: 'category', label: t('common.category') },
+    { id: 'description', label: t('common.description') },
+    { id: 'amount', label: t('common.amount') },
+    { id: 'currency', label: t('common.currency') },
   ];
 
   const handleColumnToggle = function(columnId) {
@@ -62,12 +64,12 @@ export default function ExportDialog({ open, onClose, db }) {
 
   const handleExport = async function() {
     if (!db) {
-      toast.error('Database not initialized');
+      toast.error(t('messages.databaseNotInitialized'));
       return;
     }
 
     if (selectedColumns.length === 0) {
-      toast.error('Please select at least one column');
+      toast.error(t('messages.pleaseSelectColumn'));
       return;
     }
 
@@ -76,7 +78,7 @@ export default function ExportDialog({ open, onClose, db }) {
       const costs = await db.getCostsByDateRange(startDate, endDate);
       
       if (costs.length === 0) {
-        toast.error('No data found for the selected date range');
+        toast.error(t('messages.noDataFound'));
         setLoading(false);
         return;
       }
@@ -85,15 +87,15 @@ export default function ExportDialog({ open, onClose, db }) {
 
       if (exportFormat === 'csv') {
         exportToCSV(costs, `${filename}.csv`);
-        toast.success('Data exported to CSV successfully');
+        toast.success(t('messages.dataExportedCSV'));
       } else {
-        exportToPDF(costs, 'Costs Report', `${filename}.pdf`);
-        toast.success('Data exported to PDF successfully');
+        exportToPDF(costs, t('common.costManager'), `${filename}.pdf`);
+        toast.success(t('messages.dataExportedPDF'));
       }
 
       onClose();
     } catch (error) {
-      toast.error('Failed to export data');
+      toast.error(t('messages.failedToExport'));
     } finally {
       setLoading(false);
     }
@@ -101,12 +103,12 @@ export default function ExportDialog({ open, onClose, db }) {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Export Data</DialogTitle>
+      <DialogTitle>{t('export.title')}</DialogTitle>
       <DialogContent>
         <Box sx={{ pt: 2 }}>
           <FormControl component="fieldset" fullWidth sx={{ mb: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-              Export Format
+              {t('common.exportFormat')}
             </Typography>
             <RadioGroup
               value={exportFormat}
@@ -118,18 +120,18 @@ export default function ExportDialog({ open, onClose, db }) {
           </FormControl>
 
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Date Range
+            {t('common.dateRange')}
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
             <TextField
-              label="Start Year"
+              label={t('common.year')}
               type="number"
               value={startDate.year}
               onChange={(e) => setStartDate({ ...startDate, year: parseInt(e.target.value) || 2024 })}
               size="small"
             />
             <TextField
-              label="Month"
+              label={t('common.month')}
               type="number"
               value={startDate.month}
               onChange={(e) => setStartDate({ ...startDate, month: parseInt(e.target.value) || 1 })}
@@ -137,7 +139,7 @@ export default function ExportDialog({ open, onClose, db }) {
               inputProps={{ min: 1, max: 12 }}
             />
             <TextField
-              label="Day"
+              label={t('common.day')}
               type="number"
               value={startDate.day}
               onChange={(e) => setStartDate({ ...startDate, day: parseInt(e.target.value) || 1 })}
@@ -148,14 +150,14 @@ export default function ExportDialog({ open, onClose, db }) {
 
           <Box sx={{ display: 'flex', gap: 1, mb: 3 }}>
             <TextField
-              label="End Year"
+              label={t('common.year')}
               type="number"
               value={endDate.year}
               onChange={(e) => setEndDate({ ...endDate, year: parseInt(e.target.value) || 2024 })}
               size="small"
             />
             <TextField
-              label="Month"
+              label={t('common.month')}
               type="number"
               value={endDate.month}
               onChange={(e) => setEndDate({ ...endDate, month: parseInt(e.target.value) || 1 })}
@@ -163,7 +165,7 @@ export default function ExportDialog({ open, onClose, db }) {
               inputProps={{ min: 1, max: 12 }}
             />
             <TextField
-              label="Day"
+              label={t('common.day')}
               type="number"
               value={endDate.day}
               onChange={(e) => setEndDate({ ...endDate, day: parseInt(e.target.value) || 1 })}
@@ -173,7 +175,7 @@ export default function ExportDialog({ open, onClose, db }) {
           </Box>
 
           <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>
-            Select Columns
+            {t('common.selectColumns')}
           </Typography>
           <FormGroup>
             {columns.map((column) => (
@@ -192,9 +194,9 @@ export default function ExportDialog({ open, onClose, db }) {
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t('common.cancel')}</Button>
         <Button onClick={handleExport} variant="contained" disabled={loading}>
-          {loading ? 'Exporting...' : 'Export'}
+          {loading ? t('export.exporting') : t('export.exportButton')}
         </Button>
       </DialogActions>
     </Dialog>

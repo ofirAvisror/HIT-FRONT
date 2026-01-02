@@ -17,7 +17,9 @@
     "react-hot-toast": "^2.4.1",
     "framer-motion": "^10.16.16",
     "jspdf": "^2.5.1",
-    "jspdf-autotable": "^3.8.2"
+    "jspdf-autotable": "^3.8.2",
+    "i18next": "^23.7.6",
+    "react-i18next": "^13.5.0"
   },
   "scripts": {
     "start": "react-scripts start",

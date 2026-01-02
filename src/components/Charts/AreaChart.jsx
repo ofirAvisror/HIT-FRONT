@@ -4,6 +4,7 @@
 
 import React from 'react';
 import { Paper, Typography, Box } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import { AreaChart as RechartsAreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 /**
@@ -13,12 +14,15 @@ import { AreaChart as RechartsAreaChart, Area, XAxis, YAxis, CartesianGrid, Tool
  * @param {string} props.currency - Currency code
  * @param {string} [props.title='Monthly Overview'] - Chart title
  */
-export default function AreaChart({ data, currency, title = 'Monthly Overview' }) {
+export default function AreaChart({ data, currency, title }) {
+  const { t } = useTranslation();
+  const chartTitle = title || t('charts.monthlyOverview');
+  
   return (
     <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 2, bgcolor: 'background.paper' }}>
-      {title && (
+      {chartTitle && (
         <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-          {title}
+          {chartTitle}
         </Typography>
       )}
       <Box sx={{ width: '100%', height: 400 }}>

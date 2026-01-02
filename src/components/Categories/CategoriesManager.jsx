@@ -28,6 +28,7 @@ import {
   Chip,
   Divider
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -40,6 +41,7 @@ import toast from 'react-hot-toast';
  * @param {Object|null} props.db - Database instance
  */
 export default function CategoriesManager({ db }) {
+  const { t } = useTranslation();
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openDialog, setOpenDialog] = useState(false);
@@ -107,7 +109,7 @@ export default function CategoriesManager({ db }) {
       setCategories(allCategories);
     } catch (error) {
       console.error('Failed to load categories:', error);
-      toast.error('Failed to load categories: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      toast.error(t('messages.failedToLoad') + ' categories: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setLoading(false);
     }
@@ -135,7 +137,7 @@ export default function CategoriesManager({ db }) {
 
   const handleSave = async function() {
     if (!db || !categoryName.trim()) {
-      toast.error('Please enter a category name');
+      toast.error(t('messages.pleaseEnterCategory'));
       return;
     }
 
@@ -144,11 +146,11 @@ export default function CategoriesManager({ db }) {
         // Check if this category exists in the store (has an id)
         if (editingCategory.id) {
           await db.updateCategory(editingCategory.id, { name: categoryName.trim(), color: categoryColor });
-          toast.success('Category updated successfully');
+          toast.success(t('messages.categoryUpdated'));
         } else {
           // Category from costs, add it to store
           await db.addCategory({ name: categoryName.trim(), color: categoryColor });
-          toast.success('Category added successfully');
+          toast.success(t('messages.categoryAdded'));
         }
       } else {
         // Check if category already exists in store
@@ -158,17 +160,17 @@ export default function CategoriesManager({ db }) {
         if (existing) {
           // Update existing category
           await db.updateCategory(existing.id, { name: categoryName.trim(), color: categoryColor });
-          toast.success('Category updated successfully');
+          toast.success(t('messages.categoryUpdated'));
         } else {
           // Add new category
           await db.addCategory({ name: categoryName.trim(), color: categoryColor });
-          toast.success('Category added successfully');
+          toast.success(t('messages.categoryAdded'));
         }
       }
       handleCloseDialog();
       loadCategories();
     } catch (error) {
-      toast.error('Failed to save category');
+      toast.error(t('messages.failedToSave') + ' category');
     }
   };
 
@@ -184,10 +186,10 @@ export default function CategoriesManager({ db }) {
       // Only delete if category exists in store (has an id)
       if (categoryToDelete.id) {
         await db.deleteCategory(categoryToDelete.id);
-        toast.success('Category deleted successfully');
+        toast.success(t('messages.categoryDeleted'));
       } else {
         // Category from costs, can't delete it from store (doesn't exist there)
-        toast('This category is used in expenses and cannot be deleted. You can only delete categories created in this page.', {
+        toast(t('messages.thisCategoryUsed'), {
           icon: 'ℹ️',
           duration: 4000
         });
@@ -196,13 +198,13 @@ export default function CategoriesManager({ db }) {
       setCategoryToDelete(null);
       loadCategories();
     } catch (error) {
-      toast.error('Failed to delete category');
+      toast.error(t('messages.failedToDelete') + ' category');
     }
   };
 
   const handleCategoryClick = async function(categoryName) {
     if (!db) {
-      toast.error('Database not initialized');
+      toast.error(t('messages.databaseNotInitialized'));
       return;
     }
 
@@ -228,7 +230,7 @@ export default function CategoriesManager({ db }) {
 
       setCategoryTotal(totals);
     } catch (error) {
-      toast.error('Failed to load category details');
+      toast.error(t('messages.failedToLoad') + ' category details');
       console.error(error);
     }
   };
@@ -248,7 +250,7 @@ export default function CategoriesManager({ db }) {
   if (!db) {
     return (
       <Alert severity="info">
-        Database not initialized
+        {t('messages.databaseNotInitialized')}
       </Alert>
     );
   }
@@ -265,7 +267,7 @@ export default function CategoriesManager({ db }) {
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
         <Typography variant="h4" sx={{ fontWeight: 700 }}>
-          Categories Management
+          {t('categories.title')}
         </Typography>
         <Button
           variant="contained"
@@ -278,14 +280,14 @@ export default function CategoriesManager({ db }) {
             },
           }}
         >
-          Add Category
+          {t('categories.addCategory')}
         </Button>
       </Box>
 
       {categories.length === 0 ? (
         <Paper sx={{ p: 4, textAlign: 'center', borderRadius: 3, bgcolor: 'background.paper' }}>
           <Typography variant="body1" color="text.secondary">
-            No categories yet. Add your first category!
+            {t('messages.noCategoriesYet')}
           </Typography>
         </Paper>
       ) : (
@@ -348,12 +350,12 @@ export default function CategoriesManager({ db }) {
       {/* Add/Edit Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {editingCategory ? 'Edit Category' : 'Add New Category'}
+          {editingCategory ? t('categories.editCategory') : t('categories.addNewCategory')}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 2 }}>
             <TextField
-              label="Category Name"
+              label={t('forms.categoryName')}
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
               fullWidth
@@ -361,7 +363,7 @@ export default function CategoriesManager({ db }) {
               required
             />
             <TextField
-              label="Color"
+              label={t('forms.color')}
               type="color"
               value={categoryColor}
               onChange={(e) => setCategoryColor(e.target.value)}
@@ -372,25 +374,25 @@ export default function CategoriesManager({ db }) {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog}>{t('common.cancel')}</Button>
           <Button onClick={handleSave} variant="contained">
-            {editingCategory ? 'Update' : 'Add'}
+            {editingCategory ? t('common.update') : t('common.add')}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Category</DialogTitle>
+        <DialogTitle>{t('categories.deleteCategory')}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete "{categoryToDelete?.name}"? This action cannot be undone.
+            {t('messages.areYouSure', { name: categoryToDelete?.name })}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>{t('common.cancel')}</Button>
           <Button onClick={handleDelete} color="error" variant="contained">
-            Delete
+            {t('common.delete')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -411,7 +413,7 @@ export default function CategoriesManager({ db }) {
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Typography variant="h5" sx={{ fontWeight: 700 }}>
-              {selectedCategory} - Expenses
+              {t('categories.categoryExpenses', { category: selectedCategory })}
             </Typography>
             <IconButton onClick={handleCloseCategoryDetails} size="small">
               <CloseIcon />
@@ -422,7 +424,7 @@ export default function CategoriesManager({ db }) {
           {categoryCosts.length === 0 ? (
             <Box sx={{ textAlign: 'center', py: 4 }}>
               <Typography variant="body1" color="text.secondary">
-                No expenses found for this category
+                {t('messages.noExpensesFound')}
               </Typography>
             </Box>
           ) : (
@@ -430,7 +432,7 @@ export default function CategoriesManager({ db }) {
               {/* Totals by Currency */}
               <Box sx={{ mb: 3 }}>
                 <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                  Total by Currency
+                  {t('common.totalByCurrency')}
                 </Typography>
                 <Grid container spacing={2}>
                   {Object.entries(categoryTotal).map(([currency, total]) => {
@@ -465,16 +467,16 @@ export default function CategoriesManager({ db }) {
 
               {/* Expenses List */}
               <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                All Expenses ({categoryCosts.length})
+                {t('common.allExpenses')} ({categoryCosts.length})
               </Typography>
               <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 600 }}>Date</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Description</TableCell>
-                      <TableCell align="right" sx={{ fontWeight: 600 }}>Amount</TableCell>
-                      <TableCell sx={{ fontWeight: 600 }}>Currency</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>{t('common.date')}</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>{t('common.description')}</TableCell>
+                      <TableCell align="right" sx={{ fontWeight: 600 }}>{t('common.amount')}</TableCell>
+                      <TableCell sx={{ fontWeight: 600 }}>{t('common.currency')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -499,7 +501,7 @@ export default function CategoriesManager({ db }) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseCategoryDetails}>Close</Button>
+          <Button onClick={handleCloseCategoryDetails}>{t('common.close')}</Button>
         </DialogActions>
       </Dialog>
     </Box>

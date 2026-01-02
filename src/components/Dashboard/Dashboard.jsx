@@ -11,6 +11,7 @@ import {
   Alert,
   Skeleton
 } from '@mui/material';
+import { useTranslation } from 'react-i18next';
 import StatCard from './StatCard';
 import toast from 'react-hot-toast';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -27,6 +28,7 @@ const COLORS = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'
  * @param {Object|null} props.db - Database instance
  */
 export default function Dashboard({ db }) {
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [stats, setStats] = useState(null);
@@ -50,7 +52,7 @@ export default function Dashboard({ db }) {
         const statistics = await db.getStatistics(currentYear, currentMonth, currency);
         setStats(statistics);
       } catch (err) {
-        const errorMsg = 'Failed to load statistics: ' + (err instanceof Error ? err.message : 'Unknown error');
+        const errorMsg = t('messages.failedToLoad') + ' statistics: ' + (err instanceof Error ? err.message : 'Unknown error');
         setError(errorMsg);
         toast.error(errorMsg);
       } finally {
@@ -64,7 +66,7 @@ export default function Dashboard({ db }) {
   if (!db) {
     return (
       <Alert severity="info">
-        Database not initialized. Please wait...
+        {t('messages.databaseNotInitializedWait')}
       </Alert>
     );
   }
@@ -96,7 +98,7 @@ export default function Dashboard({ db }) {
   if (!stats) {
     return (
       <Alert severity="info">
-        No data available
+        {t('common.noData')}
       </Alert>
     );
   }
@@ -112,13 +114,13 @@ export default function Dashboard({ db }) {
   return (
     <Box>
       <Typography variant="h4" sx={{ fontWeight: 700, mb: 4 }}>
-        Dashboard
+        {t('dashboard.title')}
       </Typography>
 
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Total This Month"
+            title={t('dashboard.totalThisMonth')}
             value={`${stats.totalThisMonth.toFixed(2)} ${stats.currency}`}
             change={stats.changePercentage}
             icon={<AttachMoneyIcon sx={{ fontSize: 32 }} />}
@@ -128,7 +130,7 @@ export default function Dashboard({ db }) {
         
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Average Daily"
+            title={t('dashboard.averageDaily')}
             value={`${stats.averageDaily.toFixed(2)} ${stats.currency}`}
             icon={<CalendarTodayIcon sx={{ fontSize: 32 }} />}
             color="#10b981"
@@ -137,7 +139,7 @@ export default function Dashboard({ db }) {
         
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Last Month Total"
+            title={t('dashboard.lastMonthTotal')}
             value={`${stats.totalLastMonth.toFixed(2)} ${stats.currency}`}
             icon={<TrendingUpIcon sx={{ fontSize: 32 }} />}
             color="#f59e0b"
@@ -146,7 +148,7 @@ export default function Dashboard({ db }) {
         
         <Grid item xs={12} sm={6} md={3}>
           <StatCard
-            title="Categories"
+            title={t('dashboard.categories')}
             value={Object.keys(stats.totalByCategory).length.toString()}
             icon={<CategoryIcon sx={{ fontSize: 32 }} />}
             color="#ec4899"
@@ -164,7 +166,7 @@ export default function Dashboard({ db }) {
           }}
         >
           <Typography variant="h6" sx={{ fontWeight: 600, mb: 3 }}>
-            Expenses by Category
+            {t('dashboard.expensesByCategory')}
           </Typography>
           <Box sx={{ width: '100%', height: 400 }}>
             <ResponsiveContainer>
