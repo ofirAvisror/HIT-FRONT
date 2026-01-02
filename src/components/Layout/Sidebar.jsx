@@ -41,9 +41,12 @@ const drawerWidth = 280;
  * @param {function} props.onViewChange - Function to change view
  */
 export default function Sidebar({ open, onClose, currentView, onViewChange }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const muiTheme = useMUITheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
+  
+  // Determine drawer anchor based on language direction
+  const anchor = i18n.language === 'he' ? 'right' : 'left';
 
   const navItems = [
     { id: 'dashboard', label: t('navigation.dashboard'), icon: <DashboardIcon /> },
@@ -124,14 +127,28 @@ export default function Sidebar({ open, onClose, currentView, onViewChange }) {
   return (
     <Drawer
       variant={isMobile ? 'temporary' : 'persistent'}
+      anchor={anchor}
       open={open}
       onClose={onClose}
+      ModalProps={{
+        keepMounted: true, // Better open performance on mobile
+      }}
       sx={{
         width: drawerWidth,
         flexShrink: 0,
+        zIndex: (theme) => theme.zIndex.drawer,
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
+          top: '64px', // Position below header
+          height: 'calc(100vh - 64px)',
+          zIndex: (theme) => theme.zIndex.drawer,
+          position: 'fixed',
+          ...(anchor === 'right' ? {
+            right: 0,
+          } : {
+            left: 0,
+          }),
         },
       }}
     >
