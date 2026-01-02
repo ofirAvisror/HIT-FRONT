@@ -1,5 +1,5 @@
 /**
- * Header.tsx - Application header component
+ * Header.jsx - Application header component
  */
 
 import React from 'react';
@@ -18,15 +18,13 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 
-interface HeaderProps {
-  onMenuClick: () => void;
-  notificationCount?: number;
-}
-
 /**
  * Header component
+ * @param {Object} props - Component props
+ * @param {function} props.onMenuClick - Function to handle menu click
+ * @param {number} [props.notificationCount=0] - Number of notifications
  */
-export default function Header({ onMenuClick, notificationCount = 0 }: HeaderProps): JSX.Element {
+export default function Header({ onMenuClick, notificationCount = 0 }) {
   const { mode, toggleMode } = useTheme();
 
   return (

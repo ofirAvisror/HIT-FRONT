@@ -1,5 +1,5 @@
 /**
- * Dashboard.tsx - Main dashboard component
+ * Dashboard.jsx - Main dashboard component
  */
 
 import React, { useState, useEffect } from 'react';
@@ -11,7 +11,6 @@ import {
   Alert,
   Skeleton
 } from '@mui/material';
-import { CostsDB, Currency } from '../../types/index';
 import StatCard from './StatCard';
 import toast from 'react-hot-toast';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
@@ -20,20 +19,18 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CategoryIcon from '@mui/icons-material/Category';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-interface DashboardProps {
-  db: CostsDB | null;
-}
-
 const COLORS = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'];
 
 /**
  * Dashboard component
+ * @param {Object} props - Component props
+ * @param {Object|null} props.db - Database instance
  */
-export default function Dashboard({ db }: DashboardProps): JSX.Element {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string>('');
-  const [stats, setStats] = useState<any>(null);
-  const [currency] = useState<Currency>('USD');
+export default function Dashboard({ db }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [stats, setStats] = useState(null);
+  const [currency] = useState('USD');
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
@@ -44,7 +41,7 @@ export default function Dashboard({ db }: DashboardProps): JSX.Element {
       return;
     }
 
-    async function loadStats(): Promise<void> {
+    async function loadStats() {
       if (!db) return;
       
       try {
@@ -186,7 +183,7 @@ export default function Dashboard({ db }: DashboardProps): JSX.Element {
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => `${value.toFixed(2)} ${currency}`} />
+                <Tooltip formatter={(value) => `${value.toFixed(2)} ${currency}`} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>

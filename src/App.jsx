@@ -1,5 +1,5 @@
 /**
- * App.tsx - Main application component
+ * App.jsx - Main application component
  */
 
 import React, { useState, useEffect } from 'react';
@@ -7,7 +7,6 @@ import { CssBaseline, Alert, Fade } from '@mui/material';
 import { Toaster } from 'react-hot-toast';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { NotificationProvider, useNotifications } from './contexts/NotificationContext';
-import { CostsDB } from './types/index';
 import { openCostsDB } from './lib/idb-react';
 import Layout from './components/Layout/Layout';
 import AddCostForm from './components/AddCostForm';
@@ -24,17 +23,17 @@ import NotificationCenter from './components/Notifications/NotificationCenter';
 /**
  * Main App component (inner component with notifications)
  */
-function AppInner(): JSX.Element {
-  const [db, setDb] = useState<CostsDB | null>(null);
-  const [dbError, setDbError] = useState<string>('');
-  const [currentView, setCurrentView] = useState<string>('dashboard');
+function AppInner() {
+  const [db, setDb] = useState(null);
+  const [dbError, setDbError] = useState('');
+  const [currentView, setCurrentView] = useState('dashboard');
   const { notifications, checkBudgets } = useNotifications();
 
   /**
    * Initializes the database connection
    */
   useEffect(function() {
-    async function initDB(): Promise<void> {
+    async function initDB() {
       try {
         const database = await openCostsDB('costsdb', 2);
         setDb(database);
@@ -64,7 +63,7 @@ function AppInner(): JSX.Element {
   /**
    * Renders the current view based on selection
    */
-  const renderView = function(): JSX.Element {
+  const renderView = function() {
     switch (currentView) {
       case 'dashboard':
         return <Dashboard db={db} />;
@@ -132,7 +131,7 @@ function AppInner(): JSX.Element {
 /**
  * Main App component
  */
-function App(): JSX.Element {
+function App() {
   return (
     <ThemeProvider>
       <NotificationProvider>
@@ -143,3 +142,4 @@ function App(): JSX.Element {
 }
 
 export default App;
+

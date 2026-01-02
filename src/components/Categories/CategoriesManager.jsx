@@ -1,5 +1,5 @@
 /**
- * CategoriesManager.tsx - Component for managing categories
+ * CategoriesManager.jsx - Component for managing categories
  */
 
 import React, { useState, useEffect } from 'react';
@@ -28,33 +28,30 @@ import {
   Chip,
   Divider
 } from '@mui/material';
-import { CostsDB, Category, CostItem, Currency } from '../../types/index';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import CloseIcon from '@mui/icons-material/Close';
 import toast from 'react-hot-toast';
 
-interface CategoriesManagerProps {
-  db: CostsDB | null;
-}
-
 /**
  * CategoriesManager component
+ * @param {Object} props - Component props
+ * @param {Object|null} props.db - Database instance
  */
-export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.Element {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
-  const [categoryName, setCategoryName] = useState<string>('');
-  const [categoryColor, setCategoryColor] = useState<string>('#6366f1');
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState<boolean>(false);
-  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
-  const [categoryDetailsOpen, setCategoryDetailsOpen] = useState<boolean>(false);
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [categoryCosts, setCategoryCosts] = useState<CostItem[]>([]);
-  const [categoryTotal, setCategoryTotal] = useState<Record<Currency, number>>({
+export default function CategoriesManager({ db }) {
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [editingCategory, setEditingCategory] = useState(null);
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryColor, setCategoryColor] = useState('#6366f1');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [categoryToDelete, setCategoryToDelete] = useState(null);
+  const [categoryDetailsOpen, setCategoryDetailsOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState('');
+  const [categoryCosts, setCategoryCosts] = useState([]);
+  const [categoryTotal, setCategoryTotal] = useState({
     USD: 0,
     ILS: 0,
     GBP: 0,
@@ -68,7 +65,7 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db]);
 
-  const loadCategories = async function(): Promise<void> {
+  const loadCategories = async function() {
     if (!db) return;
     
     try {
@@ -82,7 +79,7 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
       const costCategories = Array.from(new Set(allCosts.map(c => c.category)));
       
       // Create a map to combine categories from both sources
-      const categoryMap = new Map<string, Category>();
+      const categoryMap = new Map();
       
       // Add categories from store (with their colors)
       categoriesFromStore.forEach(function(cat) {
@@ -116,7 +113,7 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
     }
   };
 
-  const handleOpenDialog = function(category?: Category): void {
+  const handleOpenDialog = function(category) {
     if (category) {
       setEditingCategory(category);
       setCategoryName(category.name);
@@ -129,14 +126,14 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
     setOpenDialog(true);
   };
 
-  const handleCloseDialog = function(): void {
+  const handleCloseDialog = function() {
     setOpenDialog(false);
     setEditingCategory(null);
     setCategoryName('');
     setCategoryColor('#6366f1');
   };
 
-  const handleSave = async function(): Promise<void> {
+  const handleSave = async function() {
     if (!db || !categoryName.trim()) {
       toast.error('Please enter a category name');
       return;
@@ -160,7 +157,7 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
         
         if (existing) {
           // Update existing category
-          await db.updateCategory(existing.id!, { name: categoryName.trim(), color: categoryColor });
+          await db.updateCategory(existing.id, { name: categoryName.trim(), color: categoryColor });
           toast.success('Category updated successfully');
         } else {
           // Add new category
@@ -175,12 +172,12 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
     }
   };
 
-  const handleDeleteClick = function(category: Category): void {
+  const handleDeleteClick = function(category) {
     setCategoryToDelete(category);
     setDeleteDialogOpen(true);
   };
 
-  const handleDelete = async function(): Promise<void> {
+  const handleDelete = async function() {
     if (!db || !categoryToDelete) return;
 
     try {
@@ -203,7 +200,7 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
     }
   };
 
-  const handleCategoryClick = async function(categoryName: string): Promise<void> {
+  const handleCategoryClick = async function(categoryName) {
     if (!db) {
       toast.error('Database not initialized');
       return;
@@ -218,7 +215,7 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
       setCategoryCosts(costs);
 
       // Calculate totals by currency
-      const totals: Record<Currency, number> = {
+      const totals = {
         USD: 0,
         ILS: 0,
         GBP: 0,
@@ -236,7 +233,7 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
     }
   };
 
-  const handleCloseCategoryDetails = function(): void {
+  const handleCloseCategoryDetails = function() {
     setCategoryDetailsOpen(false);
     setSelectedCategory('');
     setCategoryCosts([]);
@@ -294,7 +291,7 @@ export default function CategoriesManager({ db }: CategoriesManagerProps): JSX.E
       ) : (
         <Grid container spacing={3}>
           {categories.map((category) => (
-            <Grid item xs={12} sm={6} md={4} key={category.id}>
+            <Grid item xs={12} sm={6} md={4} key={category.id || category.name}>
               <Card 
                 sx={{ 
                   borderRadius: 3, 

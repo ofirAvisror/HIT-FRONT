@@ -1,15 +1,16 @@
 /**
- * exportHelpers.ts - Helper functions for exporting data
+ * exportHelpers.js - Helper functions for exporting data
  */
 
-import { CostItem } from '../types/index';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 
 /**
  * Exports costs to CSV format
+ * @param {Array} costs - Array of cost items
+ * @param {string} [filename='costs-export.csv'] - Output filename
  */
-export function exportToCSV(costs: CostItem[], filename: string = 'costs-export.csv'): void {
+export function exportToCSV(costs, filename = 'costs-export.csv') {
   const headers = ['Date', 'Category', 'Description', 'Amount', 'Currency'];
   const rows = costs.map(function(cost) {
     return [
@@ -50,12 +51,11 @@ export function exportToCSV(costs: CostItem[], filename: string = 'costs-export.
 
 /**
  * Exports costs to PDF format
+ * @param {Array} costs - Array of cost items
+ * @param {string} [title='Costs Report'] - Report title
+ * @param {string} [filename='costs-export.pdf'] - Output filename
  */
-export function exportToPDF(
-  costs: CostItem[], 
-  title: string = 'Costs Report',
-  filename: string = 'costs-export.pdf'
-): void {
+export function exportToPDF(costs, title = 'Costs Report', filename = 'costs-export.pdf') {
   const doc = new jsPDF();
   
   // Add title
@@ -78,7 +78,7 @@ export function exportToPDF(
   });
 
   // Add table
-  (doc as any).autoTable({
+  doc.autoTable({
     head: [['Date', 'Category', 'Description', 'Amount', 'Currency']],
     body: tableData,
     startY: 35,
@@ -88,7 +88,7 @@ export function exportToPDF(
 
   // Add total
   const total = costs.reduce((sum, cost) => sum + cost.sum, 0);
-  const finalY = (doc as any).lastAutoTable.finalY || 35;
+  const finalY = doc.lastAutoTable.finalY || 35;
   doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
   doc.text(`Total: ${total.toFixed(2)}`, 14, finalY + 10);

@@ -1,5 +1,5 @@
 /**
- * ExportDialog.tsx - Dialog for exporting data
+ * ExportDialog.jsx - Dialog for exporting data
  */
 
 import React, { useState } from 'react';
@@ -19,31 +19,28 @@ import {
   FormGroup,
   FormControl
 } from '@mui/material';
-import { CostsDB, DateStructure } from '../../types/index';
 import { exportToCSV, exportToPDF } from '../../lib/exportHelpers';
 import toast from 'react-hot-toast';
 
-interface ExportDialogProps {
-  open: boolean;
-  onClose: () => void;
-  db: CostsDB | null;
-}
-
 /**
  * ExportDialog component
+ * @param {Object} props - Component props
+ * @param {boolean} props.open - Whether dialog is open
+ * @param {function} props.onClose - Function to close dialog
+ * @param {Object|null} props.db - Database instance
  */
-export default function ExportDialog({ open, onClose, db }: ExportDialogProps): JSX.Element {
-  const [exportFormat, setExportFormat] = useState<'csv' | 'pdf'>('csv');
-  const [startDate, setStartDate] = useState<DateStructure>(() => {
+export default function ExportDialog({ open, onClose, db }) {
+  const [exportFormat, setExportFormat] = useState('csv');
+  const [startDate, setStartDate] = useState(function() {
     const date = new Date();
     return { year: date.getFullYear(), month: date.getMonth() + 1, day: 1 };
   });
-  const [endDate, setEndDate] = useState<DateStructure>(() => {
+  const [endDate, setEndDate] = useState(function() {
     const date = new Date();
     return { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() };
   });
-  const [selectedColumns, setSelectedColumns] = useState<string[]>(['date', 'category', 'description', 'amount', 'currency']);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedColumns, setSelectedColumns] = useState(['date', 'category', 'description', 'amount', 'currency']);
+  const [loading, setLoading] = useState(false);
 
   const columns = [
     { id: 'date', label: 'Date' },
@@ -53,7 +50,7 @@ export default function ExportDialog({ open, onClose, db }: ExportDialogProps): 
     { id: 'currency', label: 'Currency' },
   ];
 
-  const handleColumnToggle = function(columnId: string): void {
+  const handleColumnToggle = function(columnId) {
     setSelectedColumns(function(prev) {
       if (prev.includes(columnId)) {
         return prev.filter(id => id !== columnId);
@@ -63,7 +60,7 @@ export default function ExportDialog({ open, onClose, db }: ExportDialogProps): 
     });
   };
 
-  const handleExport = async function(): Promise<void> {
+  const handleExport = async function() {
     if (!db) {
       toast.error('Database not initialized');
       return;
@@ -113,7 +110,7 @@ export default function ExportDialog({ open, onClose, db }: ExportDialogProps): 
             </Typography>
             <RadioGroup
               value={exportFormat}
-              onChange={(e) => setExportFormat(e.target.value as 'csv' | 'pdf')}
+              onChange={(e) => setExportFormat(e.target.value)}
             >
               <FormControlLabel value="csv" control={<Radio />} label="CSV" />
               <FormControlLabel value="pdf" control={<Radio />} label="PDF" />

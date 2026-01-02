@@ -1,5 +1,5 @@
 /**
- * AdvancedFilters.tsx - Component for advanced filtering
+ * AdvancedFilters.jsx - Component for advanced filtering
  */
 
 import React, { useState, useEffect } from 'react';
@@ -24,34 +24,31 @@ import {
   TableHead,
   TableRow
 } from '@mui/material';
-import { CostsDB, Currency, CostItem, DateStructure } from '../../types/index';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import ClearIcon from '@mui/icons-material/Clear';
 import toast from 'react-hot-toast';
 
-interface AdvancedFiltersProps {
-  db: CostsDB | null;
-}
-
 /**
  * AdvancedFilters component
+ * @param {Object} props - Component props
+ * @param {Object|null} props.db - Database instance
  */
-export default function AdvancedFilters({ db }: AdvancedFiltersProps): JSX.Element {
-  const [startDate, setStartDate] = useState<DateStructure>(() => {
+export default function AdvancedFilters({ db }) {
+  const [startDate, setStartDate] = useState(function() {
     const date = new Date();
     return { year: date.getFullYear(), month: date.getMonth() + 1, day: 1 };
   });
-  const [endDate, setEndDate] = useState<DateStructure>(() => {
+  const [endDate, setEndDate] = useState(function() {
     const date = new Date();
     return { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() };
   });
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [minAmount, setMinAmount] = useState<string>('');
-  const [maxAmount, setMaxAmount] = useState<string>('');
-  const [currency, setCurrency] = useState<Currency>('USD');
-  const [filteredCosts, setFilteredCosts] = useState<CostItem[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [minAmount, setMinAmount] = useState('');
+  const [maxAmount, setMaxAmount] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [filteredCosts, setFilteredCosts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(function() {
     if (db) {
@@ -60,7 +57,7 @@ export default function AdvancedFilters({ db }: AdvancedFiltersProps): JSX.Eleme
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db]);
 
-  const loadCategories = async function(): Promise<void> {
+  const loadCategories = async function() {
     if (!db) return;
     
     try {
@@ -72,7 +69,7 @@ export default function AdvancedFilters({ db }: AdvancedFiltersProps): JSX.Eleme
     }
   };
 
-  const handleApplyFilters = async function(): Promise<void> {
+  const handleApplyFilters = async function() {
     if (!db) {
       toast.error('Database not initialized');
       return;
@@ -116,7 +113,7 @@ export default function AdvancedFilters({ db }: AdvancedFiltersProps): JSX.Eleme
     }
   };
 
-  const handleReset = function(): void {
+  const handleReset = function() {
     const date = new Date();
     setStartDate({ year: date.getFullYear(), month: date.getMonth() + 1, day: 1 });
     setEndDate({ year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() });
@@ -205,10 +202,10 @@ export default function AdvancedFilters({ db }: AdvancedFiltersProps): JSX.Eleme
               <Select
                 multiple
                 value={selectedCategories}
-                onChange={(e) => setSelectedCategories(e.target.value as string[])}
+                onChange={(e) => setSelectedCategories(e.target.value)}
                 renderValue={(selected) => (
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {(selected as string[]).map((value) => (
+                    {selected.map((value) => (
                       <Chip key={value} label={value} size="small" />
                     ))}
                   </Box>
@@ -248,7 +245,7 @@ export default function AdvancedFilters({ db }: AdvancedFiltersProps): JSX.Eleme
           <Grid item xs={12} md={6}>
             <FormControl fullWidth size="small">
               <InputLabel>Currency</InputLabel>
-              <Select value={currency} onChange={(e) => setCurrency(e.target.value as Currency)}>
+              <Select value={currency} onChange={(e) => setCurrency(e.target.value)}>
                 <MenuItem value="USD">USD</MenuItem>
                 <MenuItem value="ILS">ILS</MenuItem>
                 <MenuItem value="GBP">GBP</MenuItem>

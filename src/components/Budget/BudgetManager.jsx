@@ -1,5 +1,5 @@
 /**
- * BudgetManager.tsx - Component for managing budgets
+ * BudgetManager.jsx - Component for managing budgets
  */
 
 import React, { useState, useEffect } from 'react';
@@ -21,31 +21,28 @@ import {
   Alert,
   CircularProgress
 } from '@mui/material';
-import { CostsDB, Budget, Currency } from '../../types/index';
 import AddIcon from '@mui/icons-material/Add';
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import BudgetCard from './BudgetCard';
 import toast from 'react-hot-toast';
 
-interface BudgetManagerProps {
-  db: CostsDB | null;
-}
-
 /**
  * BudgetManager component
+ * @param {Object} props - Component props
+ * @param {Object|null} props.db - Database instance
  */
-export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
-  const [budgets, setBudgets] = useState<Budget[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [openDialog, setOpenDialog] = useState<boolean>(false);
-  const [budgetType, setBudgetType] = useState<'monthly' | 'yearly' | 'category'>('monthly');
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
-  const [amount, setAmount] = useState<string>('');
-  const [currency, setCurrency] = useState<Currency>('USD');
-  const [category, setCategory] = useState<string>('');
-  const [categories, setCategories] = useState<string[]>([]);
-  const [spentAmounts, setSpentAmounts] = useState<Record<number, number>>({});
+export default function BudgetManager({ db }) {
+  const [budgets, setBudgets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [budgetType, setBudgetType] = useState('monthly');
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [amount, setAmount] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [category, setCategory] = useState('');
+  const [categories, setCategories] = useState([]);
+  const [spentAmounts, setSpentAmounts] = useState({});
 
   useEffect(function() {
     if (db) {
@@ -62,7 +59,7 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [db, budgets]);
 
-  const loadBudgets = async function(): Promise<void> {
+  const loadBudgets = async function() {
     if (!db) return;
     
     try {
@@ -77,7 +74,7 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
     }
   };
 
-  const loadCategories = async function(): Promise<void> {
+  const loadCategories = async function() {
     if (!db) return;
     
     try {
@@ -89,10 +86,10 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
     }
   };
 
-  const loadSpentAmounts = async function(): Promise<void> {
+  const loadSpentAmounts = async function() {
     if (!db) return;
     
-    const amounts: Record<number, number> = {};
+    const amounts = {};
     
     for (const budget of budgets) {
       try {
@@ -119,16 +116,16 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
           }, 0);
         }
         
-        amounts[budget.id!] = spent;
+        amounts[budget.id] = spent;
       } catch (error) {
-        amounts[budget.id!] = 0;
+        amounts[budget.id] = 0;
       }
     }
     
     setSpentAmounts(amounts);
   };
 
-  const handleOpenDialog = function(): void {
+  const handleOpenDialog = function() {
     setOpenDialog(true);
     setBudgetType('monthly');
     setYear(new Date().getFullYear());
@@ -138,11 +135,11 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
     setCategory('');
   };
 
-  const handleCloseDialog = function(): void {
+  const handleCloseDialog = function() {
     setOpenDialog(false);
   };
 
-  const handleSave = async function(): Promise<void> {
+  const handleSave = async function() {
     if (!db || !amount) {
       toast.error('Please enter an amount');
       return;
@@ -155,7 +152,7 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
     }
 
     try {
-      const budgetData: Omit<Budget, 'id'> = {
+      const budgetData = {
         year,
         amount: amountValue,
         currency,
@@ -229,7 +226,7 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
             <Grid item xs={12} md={6} lg={4} key={budget.id}>
               <BudgetCard 
                 budget={budget} 
-                spent={spentAmounts[budget.id!] || 0}
+                spent={spentAmounts[budget.id] || 0}
               />
             </Grid>
           ))}
@@ -245,7 +242,7 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
               <InputLabel>Budget Type</InputLabel>
               <Select
                 value={budgetType}
-                onChange={(e) => setBudgetType(e.target.value as 'monthly' | 'yearly' | 'category')}
+                onChange={(e) => setBudgetType(e.target.value)}
               >
                 <MenuItem value="monthly">Monthly</MenuItem>
                 <MenuItem value="yearly">Yearly</MenuItem>
@@ -315,7 +312,7 @@ export default function BudgetManager({ db }: BudgetManagerProps): JSX.Element {
 
             <FormControl fullWidth margin="normal">
               <InputLabel>Currency</InputLabel>
-              <Select value={currency} onChange={(e) => setCurrency(e.target.value as Currency)}>
+              <Select value={currency} onChange={(e) => setCurrency(e.target.value)}>
                 <MenuItem value="USD">USD</MenuItem>
                 <MenuItem value="ILS">ILS</MenuItem>
                 <MenuItem value="GBP">GBP</MenuItem>

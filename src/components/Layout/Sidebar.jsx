@@ -1,5 +1,5 @@
 /**
- * Sidebar.tsx - Sidebar navigation component
+ * Sidebar.jsx - Sidebar navigation component
  */
 
 import React from 'react';
@@ -29,20 +29,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 
 const drawerWidth = 280;
 
-interface SidebarProps {
-  open: boolean;
-  onClose: () => void;
-  currentView: string;
-  onViewChange: (view: string) => void;
-}
-
-interface NavItem {
-  id: string;
-  label: string;
-  icon: React.ReactElement;
-}
-
-const navItems: NavItem[] = [
+const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { id: 'add-cost', label: 'Add Cost', icon: <AddCircleOutlineIcon /> },
   { id: 'report', label: 'Report', icon: <AssessmentIcon /> },
@@ -57,12 +44,17 @@ const navItems: NavItem[] = [
 
 /**
  * Sidebar component
+ * @param {Object} props - Component props
+ * @param {boolean} props.open - Whether sidebar is open
+ * @param {function} props.onClose - Function to close sidebar
+ * @param {string} props.currentView - Current active view
+ * @param {function} props.onViewChange - Function to change view
  */
-export default function Sidebar({ open, onClose, currentView, onViewChange }: SidebarProps): JSX.Element {
+export default function Sidebar({ open, onClose, currentView, onViewChange }) {
   const muiTheme = useMUITheme();
   const isMobile = useMediaQuery(muiTheme.breakpoints.down('md'));
 
-  const handleItemClick = function(itemId: string): void {
+  const handleItemClick = function(itemId) {
     onViewChange(itemId);
     if (isMobile) {
       onClose();

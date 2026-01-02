@@ -1,5 +1,5 @@
 /**
- * NotificationCenter.tsx - Notification center component
+ * NotificationCenter.jsx - Notification center component
  */
 
 import React from 'react';
@@ -23,7 +23,7 @@ import { format } from 'date-fns';
 /**
  * NotificationCenter component
  */
-export default function NotificationCenter(): JSX.Element {
+export default function NotificationCenter() {
   const {
     notifications,
     unreadCount,

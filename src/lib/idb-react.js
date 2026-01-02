@@ -1,29 +1,16 @@
 /**
- * idb-react.ts - IndexedDB wrapper library (React/TypeScript version)
+ * idb-react.js - IndexedDB wrapper library (React/JavaScript version)
  * This library wraps IndexedDB operations using Promises
- * Compatible with React and TypeScript modules
+ * Compatible with React and JavaScript modules
  */
-
-import { 
-  Cost, 
-  Report, 
-  Currency, 
-  CostsDB, 
-  CostWithoutDate, 
-  CostItem, 
-  Statistics, 
-  Budget, 
-  Category,
-  DateStructure
-} from '../types/index';
 
 /**
  * Opens or creates an IndexedDB database for costs
- * @param databaseName - The name of the database
- * @param databaseVersion - The version number of the database
- * @returns Promise that resolves to database object with addCost and getReport methods
+ * @param {string} databaseName - The name of the database
+ * @param {number} databaseVersion - The version number of the database
+ * @returns {Promise<Object>} Promise that resolves to database object with addCost and getReport methods
  */
-export function openCostsDB(databaseName: string, databaseVersion: number): Promise<CostsDB> {
+export function openCostsDB(databaseName, databaseVersion) {
   return new Promise(function(resolve, reject) {
     const request = indexedDB.open(databaseName, databaseVersion);
 
@@ -33,20 +20,20 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
 
     request.onsuccess = function() {
       const db = request.result;
-      const dbObject: CostsDB = {
+      const dbObject = {
         /**
          * Adds a new cost item to the database
-         * @param cost - Cost object with sum, currency, category, description properties
-         * @returns Promise that resolves to the added cost object (without date as per specification)
+         * @param {Object} cost - Cost object with sum, currency, category, description properties
+         * @returns {Promise<Object>} Promise that resolves to the added cost object (without date as per specification)
          */
-        addCost: function(cost: Omit<Cost, 'date'>): Promise<CostWithoutDate> {
+        addCost: function(cost) {
           return new Promise(function(resolveAdd, rejectAdd) {
             const transaction = db.transaction(['costs'], 'readwrite');
             const store = transaction.objectStore('costs');
             
             // Set the date to current date
             const now = new Date();
-            const costWithDate: Cost = {
+            const costWithDate = {
               sum: cost.sum,
               currency: cost.currency,
               category: cost.category,
@@ -77,12 +64,12 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         },
         /**
          * Gets a detailed report for a specific month and year in a specific currency
-         * @param year - The year
-         * @param month - The month (1-12)
-         * @param currency - The target currency (USD, ILS, GBP, EURO)
-         * @returns Promise that resolves to report object
+         * @param {number} year - The year
+         * @param {number} month - The month (1-12)
+         * @param {string} currency - The target currency (USD, ILS, GBP, EURO)
+         * @returns {Promise<Object>} Promise that resolves to report object
          */
-        getReport: function(year: number, month: number, currency: Currency): Promise<Report> {
+        getReport: function(year, month, currency) {
           return new Promise(function(resolveReport, rejectReport) {
             // First, fetch exchange rates
             const exchangeRateUrl = localStorage.getItem('exchangeRateUrl') || './exchange-rates.json';
@@ -91,7 +78,7 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
               .then(function(response) {
                 return response.json();
               })
-              .then(function(rates: Record<string, number>) {
+              .then(function(rates) {
                 const transaction = db.transaction(['costs'], 'readonly');
                 const store = transaction.objectStore('costs');
                 
@@ -99,12 +86,12 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
                 // IndexedDB doesn't support nested property paths in compound indexes,
                 // so we query all and filter in JavaScript
                 const request = store.openCursor();
-                const costs: Cost[] = [];
+                const costs = [];
                 
-                request.onsuccess = function(event: Event) {
-                  const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+                request.onsuccess = function(event) {
+                  const cursor = event.target.result;
                   if (cursor) {
-                    const value = cursor.value as Cost;
+                    const value = cursor.value;
                     // Filter by exact year and month match
                     if (value.date && value.date.year === year && value.date.month === month) {
                       costs.push(value);
@@ -133,7 +120,7 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
                       return sum + item.sum;
                     }, 0);
                     
-                    const report: Report = {
+                    const report = {
                       year: year,
                       month: month,
                       costs: convertedCosts,
@@ -159,15 +146,16 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Gets all cost items
+         * @returns {Promise<Array>} Promise that resolves to array of cost items
          */
-        getAllCosts: function(): Promise<CostItem[]> {
+        getAllCosts: function() {
           return new Promise(function(resolve, reject) {
             const transaction = db.transaction(['costs'], 'readonly');
             const store = transaction.objectStore('costs');
             const request = store.getAll();
             
             request.onsuccess = function() {
-              resolve(request.result as CostItem[]);
+              resolve(request.result);
             };
             
             request.onerror = function() {
@@ -178,18 +166,20 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Gets costs by category
+         * @param {string} category - The category name
+         * @returns {Promise<Array>} Promise that resolves to array of cost items
          */
-        getCostsByCategory: function(category: string): Promise<CostItem[]> {
+        getCostsByCategory: function(category) {
           return new Promise(function(resolve, reject) {
             const transaction = db.transaction(['costs'], 'readonly');
             const store = transaction.objectStore('costs');
             const request = store.openCursor();
-            const costs: CostItem[] = [];
+            const costs = [];
             
-            request.onsuccess = function(event: Event) {
-              const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+            request.onsuccess = function(event) {
+              const cursor = event.target.result;
               if (cursor) {
-                const value = cursor.value as CostItem;
+                const value = cursor.value;
                 if (value.category === category) {
                   costs.push(value);
                 }
@@ -207,18 +197,21 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Gets costs by date range
+         * @param {Object} startDate - Start date object with year, month, day
+         * @param {Object} endDate - End date object with year, month, day
+         * @returns {Promise<Array>} Promise that resolves to array of cost items
          */
-        getCostsByDateRange: function(startDate: DateStructure, endDate: DateStructure): Promise<CostItem[]> {
+        getCostsByDateRange: function(startDate, endDate) {
           return new Promise(function(resolve, reject) {
             const transaction = db.transaction(['costs'], 'readonly');
             const store = transaction.objectStore('costs');
             const request = store.openCursor();
-            const costs: CostItem[] = [];
+            const costs = [];
             
-            request.onsuccess = function(event: Event) {
-              const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+            request.onsuccess = function(event) {
+              const cursor = event.target.result;
               if (cursor) {
-                const value = cursor.value as CostItem;
+                const value = cursor.value;
                 const date = value.date;
                 
                 // Check if date is within range
@@ -243,8 +236,12 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Gets statistics for a month
+         * @param {number} year - The year
+         * @param {number} month - The month (1-12)
+         * @param {string} currency - The target currency
+         * @returns {Promise<Object>} Promise that resolves to statistics object
          */
-        getStatistics: function(year: number, month: number, currency: Currency): Promise<Statistics> {
+        getStatistics: function(year, month, currency) {
           return new Promise(function(resolve, reject) {
             const exchangeRateUrl = localStorage.getItem('exchangeRateUrl') || './exchange-rates.json';
             
@@ -252,7 +249,7 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
               .then(function(response) {
                 return response.json();
               })
-              .then(function(rates: Record<string, number>) {
+              .then(function(rates) {
                 // Get current month costs
                 dbObject.getReport(year, month, currency)
                   .then(function(currentReport) {
@@ -268,7 +265,7 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
                         const averageDaily = totalThisMonth / daysInMonth;
                         
                         // Calculate by category
-                        const totalByCategory: Record<string, number> = {};
+                        const totalByCategory = {};
                         currentReport.costs.forEach(function(cost) {
                           if (totalByCategory[cost.category]) {
                             totalByCategory[cost.category] += cost.sum;
@@ -282,7 +279,7 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
                           ? ((totalThisMonth - totalLastMonth) / totalLastMonth) * 100 
                           : 0;
                         
-                        const stats: Statistics = {
+                        const stats = {
                           totalThisMonth,
                           totalLastMonth,
                           averageDaily,
@@ -303,21 +300,24 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Updates a cost item
+         * @param {number} id - The cost item ID
+         * @param {Object} cost - Partial cost object with fields to update
+         * @returns {Promise<Object>} Promise that resolves to updated cost item
          */
-        updateCost: function(id: number, cost: Partial<Cost>): Promise<CostItem> {
+        updateCost: function(id, cost) {
           return new Promise(function(resolve, reject) {
             const transaction = db.transaction(['costs'], 'readwrite');
             const store = transaction.objectStore('costs');
             const getRequest = store.get(id);
             
             getRequest.onsuccess = function() {
-              const existing = getRequest.result as CostItem;
+              const existing = getRequest.result;
               if (!existing) {
                 reject(new Error('Cost item not found'));
                 return;
               }
               
-              const updated: CostItem = {
+              const updated = {
                 ...existing,
                 ...cost,
                 id: existing.id
@@ -342,8 +342,10 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Deletes a cost item
+         * @param {number} id - The cost item ID
+         * @returns {Promise<void>} Promise that resolves when deletion is complete
          */
-        deleteCost: function(id: number): Promise<void> {
+        deleteCost: function(id) {
           return new Promise(function(resolve, reject) {
             const transaction = db.transaction(['costs'], 'readwrite');
             const store = transaction.objectStore('costs');
@@ -361,8 +363,9 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Gets all categories
+         * @returns {Promise<Array>} Promise that resolves to array of categories
          */
-        getCategories: function(): Promise<Category[]> {
+        getCategories: function() {
           return new Promise(function(resolve, reject) {
             try {
               // Check if object store exists
@@ -396,8 +399,10 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Adds a category
+         * @param {Object} category - Category object with name and optional color/icon
+         * @returns {Promise<Object>} Promise that resolves to added category with ID
          */
-        addCategory: function(category: Omit<Category, 'id'>): Promise<Category> {
+        addCategory: function(category) {
           return new Promise(function(resolve, reject) {
             try {
               if (!db.objectStoreNames.contains('categories')) {
@@ -410,9 +415,9 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
               const request = store.add(category);
               
               request.onsuccess = function() {
-                const newCategory: Category = {
+                const newCategory = {
                   ...category,
-                  id: request.result as number
+                  id: request.result
                 };
                 resolve(newCategory);
               };
@@ -428,21 +433,24 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Updates a category
+         * @param {number} id - The category ID
+         * @param {Object} category - Partial category object with fields to update
+         * @returns {Promise<Object>} Promise that resolves to updated category
          */
-        updateCategory: function(id: number, category: Partial<Category>): Promise<Category> {
+        updateCategory: function(id, category) {
           return new Promise(function(resolve, reject) {
             const transaction = db.transaction(['categories'], 'readwrite');
             const store = transaction.objectStore('categories');
             const getRequest = store.get(id);
             
             getRequest.onsuccess = function() {
-              const existing = getRequest.result as Category;
+              const existing = getRequest.result;
               if (!existing) {
                 reject(new Error('Category not found'));
                 return;
               }
               
-              const updated: Category = {
+              const updated = {
                 ...existing,
                 ...category,
                 id: existing.id
@@ -467,8 +475,10 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Deletes a category
+         * @param {number} id - The category ID
+         * @returns {Promise<void>} Promise that resolves when deletion is complete
          */
-        deleteCategory: function(id: number): Promise<void> {
+        deleteCategory: function(id) {
           return new Promise(function(resolve, reject) {
             const transaction = db.transaction(['categories'], 'readwrite');
             const store = transaction.objectStore('categories');
@@ -486,17 +496,21 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Gets budget
+         * @param {number} year - The year
+         * @param {number} [month] - Optional month (1-12)
+         * @param {string} [category] - Optional category name
+         * @returns {Promise<Object|null>} Promise that resolves to budget object or null
          */
-        getBudget: function(year: number, month?: number, category?: string): Promise<Budget | null> {
+        getBudget: function(year, month, category) {
           return new Promise(function(resolve, reject) {
             const transaction = db.transaction(['budgets'], 'readonly');
             const store = transaction.objectStore('budgets');
             const request = store.openCursor();
             
-            request.onsuccess = function(event: Event) {
-              const cursor = (event.target as IDBRequest<IDBCursorWithValue>).result;
+            request.onsuccess = function(event) {
+              const cursor = event.target.result;
               if (cursor) {
-                const budget = cursor.value as Budget;
+                const budget = cursor.value;
                 if (budget.year === year) {
                   if (category && budget.category === category && budget.type === 'category') {
                     resolve(budget);
@@ -523,8 +537,10 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Sets budget
+         * @param {Object} budget - Budget object without ID
+         * @returns {Promise<Object>} Promise that resolves to budget object with ID
          */
-        setBudget: function(budget: Omit<Budget, 'id'>): Promise<Budget> {
+        setBudget: function(budget) {
           return new Promise(function(resolve, reject) {
             try {
               if (!db.objectStoreNames.contains('budgets')) {
@@ -537,9 +553,9 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
               const request = store.add(budget);
               
               request.onsuccess = function() {
-                const newBudget: Budget = {
+                const newBudget = {
                   ...budget,
-                  id: request.result as number
+                  id: request.result
                 };
                 resolve(newBudget);
               };
@@ -555,8 +571,9 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
         
         /**
          * Gets all budgets
+         * @returns {Promise<Array>} Promise that resolves to array of budgets
          */
-        getAllBudgets: function(): Promise<Budget[]> {
+        getAllBudgets: function() {
           return new Promise(function(resolve, reject) {
             try {
               // Check if object store exists
@@ -592,9 +609,9 @@ export function openCostsDB(databaseName: string, databaseVersion: number): Prom
       resolve(dbObject);
     };
 
-    request.onupgradeneeded = function(event: IDBVersionChangeEvent) {
-      const db = (event.target as IDBOpenDBRequest).result;
-      const transaction = (event.target as IDBOpenDBRequest).transaction;
+    request.onupgradeneeded = function(event) {
+      const db = event.target.result;
+      const transaction = event.target.transaction;
       
       if (!transaction) return;
       

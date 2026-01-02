@@ -1,27 +1,19 @@
 /**
- * AreaChart.tsx - Area chart component
+ * LineChart.jsx - Line chart component for trends
  */
 
 import React from 'react';
 import { Paper, Typography, Box } from '@mui/material';
-import { AreaChart as RechartsAreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { Currency } from '../../types/index';
-
-interface AreaChartDataItem {
-  month: string;
-  total: number;
-}
-
-interface AreaChartProps {
-  data: AreaChartDataItem[];
-  currency: Currency;
-  title?: string;
-}
+import { LineChart as RechartsLineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 /**
- * AreaChart component
+ * LineChart component
+ * @param {Object} props - Component props
+ * @param {Array} props.data - Chart data array
+ * @param {string} props.currency - Currency code
+ * @param {string} [props.title='Monthly Trends'] - Chart title
  */
-export default function AreaChart({ data, currency, title = 'Monthly Overview' }: AreaChartProps): JSX.Element {
+export default function LineChart({ data, currency, title = 'Monthly Trends' }) {
   return (
     <Paper sx={{ p: 4, borderRadius: 3, boxShadow: 2, bgcolor: 'background.paper' }}>
       {title && (
@@ -31,13 +23,7 @@ export default function AreaChart({ data, currency, title = 'Monthly Overview' }
       )}
       <Box sx={{ width: '100%', height: 400 }}>
         <ResponsiveContainer>
-          <RechartsAreaChart data={data}>
-            <defs>
-              <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#6366f1" stopOpacity={0.8} />
-                <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
-              </linearGradient>
-            </defs>
+          <RechartsLineChart data={data}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
             <XAxis 
               dataKey="month" 
@@ -49,22 +35,23 @@ export default function AreaChart({ data, currency, title = 'Monthly Overview' }
               axisLine={{ stroke: '#e0e0e0' }}
             />
             <Tooltip 
-              formatter={(value: number) => `${value.toFixed(2)} ${currency}`}
+              formatter={(value) => `${value.toFixed(2)} ${currency}`}
               contentStyle={{ 
                 borderRadius: 8,
                 border: '1px solid #e0e0e0',
               }}
             />
             <Legend />
-            <Area 
+            <Line 
               type="monotone" 
               dataKey="total" 
               stroke="#6366f1" 
-              fillOpacity={1}
-              fill="url(#colorTotal)"
+              strokeWidth={3}
+              dot={{ fill: '#6366f1', r: 4 }}
+              activeDot={{ r: 6 }}
               name={`Total (${currency})`}
             />
-          </RechartsAreaChart>
+          </RechartsLineChart>
         </ResponsiveContainer>
       </Box>
     </Paper>

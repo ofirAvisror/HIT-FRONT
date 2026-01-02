@@ -1,5 +1,5 @@
 /**
- * Settings.tsx - Component for application settings
+ * Settings.jsx - Component for application settings
  */
 
 import React, { useState, useEffect } from 'react';
@@ -13,15 +13,13 @@ import {
   CardContent
 } from '@mui/material';
 import toast from 'react-hot-toast';
-// import SettingsIcon from '@mui/icons-material/Settings';
-// import SaveIcon from '@mui/icons-material/Save';
 
 /**
  * Settings component
  * Allows users to configure the exchange rate URL
  */
-export default function Settings(): JSX.Element {
-  const [exchangeRateUrl, setExchangeRateUrl] = useState<string>('./exchange-rates.json');
+export default function Settings() {
+  const [exchangeRateUrl, setExchangeRateUrl] = useState('./exchange-rates.json');
 
   /**
    * Loads the current exchange rate URL from localStorage on mount
@@ -36,7 +34,7 @@ export default function Settings(): JSX.Element {
   /**
    * Handles saving the exchange rate URL
    */
-  const handleSave = function(): void {
+  const handleSave = function() {
     localStorage.setItem('exchangeRateUrl', exchangeRateUrl);
     toast.success('Settings saved successfully!');
   };
@@ -53,7 +51,6 @@ export default function Settings(): JSX.Element {
     >
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          {/* <SettingsIcon sx={{ fontSize: 32, color: 'primary.main', mr: 2 }} /> */}
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
             ⚙️ Settings
           </Typography>
@@ -90,7 +87,6 @@ export default function Settings(): JSX.Element {
             variant="contained"
             color="primary"
             onClick={handleSave}
-            // startIcon={<SaveIcon />}
             fullWidth
             size="large"
             sx={{ 

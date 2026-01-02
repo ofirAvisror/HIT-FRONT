@@ -1,28 +1,20 @@
 /**
- * ThemeContext.tsx - Context for managing theme (light/dark mode)
+ * ThemeContext.jsx - Context for managing theme (light/dark mode)
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { ThemeProvider as MUIThemeProvider, createTheme, Theme } from '@mui/material/styles';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { ThemeProvider as MUIThemeProvider, createTheme } from '@mui/material/styles';
 
-interface ThemeContextType {
-  mode: 'light' | 'dark';
-  toggleMode: () => void;
-  theme: Theme;
-}
-
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
-
-interface ThemeProviderProps {
-  children: ReactNode;
-}
+const ThemeContext = createContext(undefined);
 
 /**
  * ThemeProvider component
  * Manages light/dark mode theme
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
  */
-export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
-  const [mode, setMode] = useState<'light' | 'dark'>(() => {
+export function ThemeProvider({ children }) {
+  const [mode, setMode] = useState(function() {
     const saved = localStorage.getItem('themeMode');
     return (saved === 'dark' || saved === 'light') ? saved : 'light';
   });
@@ -31,7 +23,7 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
     localStorage.setItem('themeMode', mode);
   }, [mode]);
 
-  const toggleMode = function(): void {
+  const toggleMode = function() {
     setMode(function(prevMode) {
       return prevMode === 'light' ? 'dark' : 'light';
     });
@@ -130,8 +122,9 @@ export function ThemeProvider({ children }: ThemeProviderProps): JSX.Element {
 
 /**
  * Hook to use theme context
+ * @returns {Object} Theme context value with mode, toggleMode, and theme
  */
-export function useTheme(): ThemeContextType {
+export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');

@@ -1,5 +1,5 @@
 /**
- * ReportView.tsx - Component for displaying detailed monthly reports
+ * ReportView.jsx - Component for displaying detailed monthly reports
  */
 
 import React, { useState } from 'react';
@@ -24,34 +24,28 @@ import {
   Chip,
   Fade
 } from '@mui/material';
-import { CostsDB, Currency, Report } from '../types/index';
 import ExportDialog from './Export/ExportDialog';
 import toast from 'react-hot-toast';
-// import AssessmentIcon from '@mui/icons-material/Assessment';
-// import GetAppIcon from '@mui/icons-material/GetApp';
-// import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
-
-interface ReportViewProps {
-  db: CostsDB | null;
-}
 
 /**
  * ReportView component
  * Displays a detailed report for a specific month and year in a selected currency
+ * @param {Object} props - Component props
+ * @param {Object|null} props.db - Database instance
  */
-export default function ReportView({ db }: ReportViewProps): JSX.Element {
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
-  const [currency, setCurrency] = useState<Currency>('USD');
-  const [report, setReport] = useState<Report | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [exportDialogOpen, setExportDialogOpen] = useState<boolean>(false);
+export default function ReportView({ db }) {
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [currency, setCurrency] = useState('USD');
+  const [report, setReport] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   /**
    * Fetches and displays the report
    */
-  const handleGetReport = async function(): Promise<void> {
+  const handleGetReport = async function() {
     if (!db) {
       toast.error('Database not initialized');
       return;
@@ -88,7 +82,6 @@ export default function ReportView({ db }: ReportViewProps): JSX.Element {
     >
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          {/* <AssessmentIcon sx={{ fontSize: 32, color: 'primary.main', mr: 2 }} /> */}
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
             📊 Monthly Report
           </Typography>
@@ -119,7 +112,7 @@ export default function ReportView({ db }: ReportViewProps): JSX.Element {
           <Select
             value={month}
             label="Month"
-            onChange={(e) => setMonth(e.target.value as number)}
+            onChange={(e) => setMonth(e.target.value)}
           >
             {monthNames.map((name, index) => (
               <MenuItem key={index + 1} value={index + 1}>
@@ -134,7 +127,7 @@ export default function ReportView({ db }: ReportViewProps): JSX.Element {
           <Select
             value={currency}
             label="Currency"
-            onChange={(e) => setCurrency(e.target.value as Currency)}
+            onChange={(e) => setCurrency(e.target.value)}
           >
             <MenuItem value="USD">USD</MenuItem>
             <MenuItem value="ILS">ILS</MenuItem>
@@ -147,7 +140,6 @@ export default function ReportView({ db }: ReportViewProps): JSX.Element {
               variant="contained"
               onClick={handleGetReport}
               disabled={!db || loading}
-              // startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <GetAppIcon />}
               sx={{
                 borderRadius: 2,
                 px: 3,
@@ -176,7 +168,6 @@ export default function ReportView({ db }: ReportViewProps): JSX.Element {
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <Chip 
-                    // icon={<TrendingUpIcon />}
                     label={`${report.costs.length} items`}
                     color="primary"
                     sx={{ fontWeight: 600 }}

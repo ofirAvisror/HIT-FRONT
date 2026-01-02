@@ -1,5 +1,5 @@
 /**
- * PieChartView.tsx - Component for displaying pie chart of costs by category
+ * PieChartView.jsx - Component for displaying pie chart of costs by category
  */
 
 import React, { useState } from 'react';
@@ -20,27 +20,22 @@ import {
   Fade
 } from '@mui/material';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
-import { CostsDB, Currency } from '../types/index';
-import { getPieChartData, PieChartDataItem } from '../lib/chartHelpers';
+import { getPieChartData } from '../lib/chartHelpers';
 import { motion } from 'framer-motion';
-// import PieChartIcon from '@mui/icons-material/PieChart';
-// import GetAppIcon from '@mui/icons-material/GetApp';
-
-interface PieChartViewProps {
-  db: CostsDB | null;
-}
 
 /**
  * PieChartView component
  * Displays a pie chart showing total costs by category for a specific month and year
+ * @param {Object} props - Component props
+ * @param {Object|null} props.db - Database instance
  */
-export default function PieChartView({ db }: PieChartViewProps): JSX.Element {
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [month, setMonth] = useState<number>(new Date().getMonth() + 1);
-  const [currency, setCurrency] = useState<Currency>('USD');
-  const [chartData, setChartData] = useState<PieChartDataItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+export default function PieChartView({ db }) {
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [currency, setCurrency] = useState('USD');
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   /**
    * Colors for pie chart segments
@@ -50,7 +45,7 @@ export default function PieChartView({ db }: PieChartViewProps): JSX.Element {
   /**
    * Fetches and displays the pie chart
    */
-  const handleGetChart = async function(): Promise<void> {
+  const handleGetChart = async function() {
     if (!db) {
       setErrorMessage('Database not initialized');
       return;
@@ -87,7 +82,6 @@ export default function PieChartView({ db }: PieChartViewProps): JSX.Element {
     >
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          {/* <PieChartIcon sx={{ fontSize: 32, color: 'primary.main', mr: 2 }} /> */}
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
             🥧 Costs by Category
           </Typography>
@@ -133,7 +127,7 @@ export default function PieChartView({ db }: PieChartViewProps): JSX.Element {
           <Select
             value={month}
             label="Month"
-            onChange={(e) => setMonth(e.target.value as number)}
+            onChange={(e) => setMonth(e.target.value)}
           >
             {monthNames.map((name, index) => (
               <MenuItem key={index + 1} value={index + 1}>
@@ -148,7 +142,7 @@ export default function PieChartView({ db }: PieChartViewProps): JSX.Element {
           <Select
             value={currency}
             label="Currency"
-            onChange={(e) => setCurrency(e.target.value as Currency)}
+            onChange={(e) => setCurrency(e.target.value)}
           >
             <MenuItem value="USD">USD</MenuItem>
             <MenuItem value="ILS">ILS</MenuItem>
@@ -161,7 +155,6 @@ export default function PieChartView({ db }: PieChartViewProps): JSX.Element {
               variant="contained"
               onClick={handleGetChart}
               disabled={!db || loading}
-              // startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <GetAppIcon />}
               sx={{
                 borderRadius: 2,
                 px: 3,
@@ -224,7 +217,7 @@ export default function PieChartView({ db }: PieChartViewProps): JSX.Element {
                         ))}
                       </Pie>
                       <Tooltip 
-                        formatter={(value: number) => `${value.toFixed(2)} ${currency}`}
+                        formatter={(value) => `${value.toFixed(2)} ${currency}`}
                         contentStyle={{ borderRadius: 8 }}
                       />
                       <Legend 

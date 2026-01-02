@@ -1,39 +1,18 @@
 /**
- * NotificationContext.tsx - Context for managing notifications
+ * NotificationContext.jsx - Context for managing notifications
  */
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { CostsDB } from '../types/index';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export interface Notification {
-  id: string;
-  type: 'budget_warning' | 'budget_exceeded' | 'high_expense';
-  message: string;
-  timestamp: Date;
-  read: boolean;
-}
-
-interface NotificationContextType {
-  notifications: Notification[];
-  unreadCount: number;
-  markAsRead: (id: string) => void;
-  markAllAsRead: () => void;
-  clearNotification: (id: string) => void;
-  clearAll: () => void;
-  checkBudgets: (db: CostsDB | null) => Promise<void>;
-}
-
-const NotificationContext = createContext<NotificationContextType | undefined>(undefined);
-
-interface NotificationProviderProps {
-  children: ReactNode;
-}
+const NotificationContext = createContext(undefined);
 
 /**
  * NotificationProvider component
+ * @param {Object} props - Component props
+ * @param {React.ReactNode} props.children - Child components
  */
-export function NotificationProvider({ children }: NotificationProviderProps): JSX.Element {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+export function NotificationProvider({ children }) {
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(function() {
     // Load notifications from localStorage
@@ -41,7 +20,7 @@ export function NotificationProvider({ children }: NotificationProviderProps): J
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        setNotifications(parsed.map(function(n: any) {
+        setNotifications(parsed.map(function(n) {
           return { ...n, timestamp: new Date(n.timestamp) };
         }));
       } catch (error) {
@@ -57,7 +36,7 @@ export function NotificationProvider({ children }: NotificationProviderProps): J
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = function(id: string): void {
+  const markAsRead = function(id) {
     setNotifications(function(prev) {
       return prev.map(function(n) {
         return n.id === id ? { ...n, read: true } : n;
@@ -65,7 +44,7 @@ export function NotificationProvider({ children }: NotificationProviderProps): J
     });
   };
 
-  const markAllAsRead = function(): void {
+  const markAllAsRead = function() {
     setNotifications(function(prev) {
       return prev.map(function(n) {
         return { ...n, read: true };
@@ -73,7 +52,7 @@ export function NotificationProvider({ children }: NotificationProviderProps): J
     });
   };
 
-  const clearNotification = function(id: string): void {
+  const clearNotification = function(id) {
     setNotifications(function(prev) {
       return prev.filter(function(n) {
         return n.id !== id;
@@ -81,16 +60,16 @@ export function NotificationProvider({ children }: NotificationProviderProps): J
     });
   };
 
-  const clearAll = function(): void {
+  const clearAll = function() {
     setNotifications([]);
   };
 
-  const checkBudgets = async function(db: CostsDB | null): Promise<void> {
+  const checkBudgets = async function(db) {
     if (!db) return;
 
     try {
       const budgets = await db.getAllBudgets();
-      const newNotifications: Notification[] = [];
+      const newNotifications = [];
 
       for (const budget of budgets) {
         let spent = 0;
@@ -162,8 +141,9 @@ export function NotificationProvider({ children }: NotificationProviderProps): J
 
 /**
  * Hook to use notification context
+ * @returns {Object} Notification context value
  */
-export function useNotifications(): NotificationContextType {
+export function useNotifications() {
   const context = useContext(NotificationContext);
   if (context === undefined) {
     throw new Error('useNotifications must be used within a NotificationProvider');

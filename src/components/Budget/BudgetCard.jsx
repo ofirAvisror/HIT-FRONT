@@ -1,25 +1,22 @@
 /**
- * BudgetCard.tsx - Budget card component
+ * BudgetCard.jsx - Budget card component
  */
 
 import React from 'react';
 import { Card, CardContent, Typography, Box, LinearProgress, Chip } from '@mui/material';
-import { Budget } from '../../types/index';
-
-interface BudgetCardProps {
-  budget: Budget;
-  spent: number;
-}
 
 /**
  * BudgetCard component
+ * @param {Object} props - Component props
+ * @param {Object} props.budget - Budget object
+ * @param {number} props.spent - Amount spent
  */
-export default function BudgetCard({ budget, spent }: BudgetCardProps): JSX.Element {
+export default function BudgetCard({ budget, spent }) {
   const percentage = (spent / budget.amount) * 100;
   const remaining = budget.amount - spent;
   const isOverBudget = spent > budget.amount;
 
-  const getBudgetTypeLabel = function(): string {
+  const getBudgetTypeLabel = function() {
     if (budget.type === 'monthly') {
       return `Monthly (${budget.month}/${budget.year})`;
     } else if (budget.type === 'yearly') {

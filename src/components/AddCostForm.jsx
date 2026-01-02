@@ -1,5 +1,5 @@
 /**
- * AddCostForm.tsx - Component for adding new cost items
+ * AddCostForm.jsx - Component for adding new cost items
  */
 
 import React, { useState, useEffect } from 'react';
@@ -16,33 +16,26 @@ import {
   CardContent,
   Autocomplete
 } from '@mui/material';
-import { CostsDB, Currency } from '../types/index';
 import toast from 'react-hot-toast';
-// import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-// import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-// import CategoryIcon from '@mui/icons-material/Category';
-// import DescriptionIcon from '@mui/icons-material/Description';
-
-interface AddCostFormProps {
-  db: CostsDB | null;
-}
 
 /**
  * AddCostForm component
  * Allows users to add new cost items with sum, currency, category, and description
+ * @param {Object} props - Component props
+ * @param {Object|null} props.db - Database instance
  */
-export default function AddCostForm({ db }: AddCostFormProps): JSX.Element {
-  const [sum, setSum] = useState<string>('');
-  const [currency, setCurrency] = useState<Currency>('USD');
-  const [category, setCategory] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
-  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+export default function AddCostForm({ db }) {
+  const [sum, setSum] = useState('');
+  const [currency, setCurrency] = useState('USD');
+  const [category, setCategory] = useState('');
+  const [description, setDescription] = useState('');
+  const [availableCategories, setAvailableCategories] = useState([]);
 
   /**
    * Loads available categories from database and existing costs
    */
   useEffect(function() {
-    async function loadCategories(): Promise<void> {
+    async function loadCategories() {
       if (!db) return;
 
       try {
@@ -76,7 +69,7 @@ export default function AddCostForm({ db }: AddCostFormProps): JSX.Element {
   /**
    * Handles form submission
    */
-  const handleSubmit = async function(event: React.FormEvent<HTMLFormElement>): Promise<void> {
+  const handleSubmit = async function(event) {
     event.preventDefault();
     
     if (!db) {
@@ -145,7 +138,6 @@ export default function AddCostForm({ db }: AddCostFormProps): JSX.Element {
     >
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          {/* <AddCircleOutlineIcon sx={{ fontSize: 32, color: 'primary.main', mr: 2 }} /> */}
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
             ➕ Add New Cost Item
           </Typography>
@@ -161,13 +153,6 @@ export default function AddCostForm({ db }: AddCostFormProps): JSX.Element {
             required
             margin="normal"
             inputProps={{ min: 0, step: 0.01 }}
-            // InputProps={{
-            //   startAdornment: (
-            //     <InputAdornment position="start">
-            //       <AttachMoneyIcon color="action" />
-            //     </InputAdornment>
-            //   ),
-            // }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
@@ -192,7 +177,7 @@ export default function AddCostForm({ db }: AddCostFormProps): JSX.Element {
             <Select
               value={currency}
               label="Currency"
-              onChange={(e) => setCurrency(e.target.value as Currency)}
+              onChange={(e) => setCurrency(e.target.value)}
             >
               <MenuItem value="USD">USD - US Dollar</MenuItem>
               <MenuItem value="ILS">ILS - Israeli Shekel</MenuItem>
@@ -238,13 +223,6 @@ export default function AddCostForm({ db }: AddCostFormProps): JSX.Element {
             margin="normal"
             multiline
             rows={4}
-            // InputProps={{
-            //   startAdornment: (
-            //     <InputAdornment position="start" sx={{ alignSelf: 'flex-start', mt: 1 }}>
-            //       <DescriptionIcon color="action" />
-            //     </InputAdornment>
-            //   ),
-            // }}
             sx={{
               '& .MuiOutlinedInput-root': {
                 borderRadius: 2,
@@ -261,7 +239,6 @@ export default function AddCostForm({ db }: AddCostFormProps): JSX.Element {
             color="primary"
             fullWidth
             size="large"
-            // startIcon={<AddCircleOutlineIcon />}
             sx={{ 
               mt: 3, 
               py: 1.5,

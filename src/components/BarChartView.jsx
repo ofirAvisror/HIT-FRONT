@@ -1,5 +1,5 @@
 /**
- * BarChartView.tsx - Component for displaying bar chart of monthly costs
+ * BarChartView.jsx - Component for displaying bar chart of monthly costs
  */
 
 import React, { useState } from 'react';
@@ -20,31 +20,26 @@ import {
   Fade
 } from '@mui/material';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { CostsDB, Currency } from '../types/index';
-import { getBarChartData, BarChartDataItem } from '../lib/chartHelpers';
+import { getBarChartData } from '../lib/chartHelpers';
 import { motion } from 'framer-motion';
-// import BarChartIcon from '@mui/icons-material/BarChart';
-// import GetAppIcon from '@mui/icons-material/GetApp';
-
-interface BarChartViewProps {
-  db: CostsDB | null;
-}
 
 /**
  * BarChartView component
  * Displays a bar chart showing total costs for each month in a selected year
+ * @param {Object} props - Component props
+ * @param {Object|null} props.db - Database instance
  */
-export default function BarChartView({ db }: BarChartViewProps): JSX.Element {
-  const [year, setYear] = useState<number>(new Date().getFullYear());
-  const [currency, setCurrency] = useState<Currency>('USD');
-  const [chartData, setChartData] = useState<BarChartDataItem[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+export default function BarChartView({ db }) {
+  const [year, setYear] = useState(new Date().getFullYear());
+  const [currency, setCurrency] = useState('USD');
+  const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   /**
    * Fetches and displays the bar chart
    */
-  const handleGetChart = async function(): Promise<void> {
+  const handleGetChart = async function() {
     if (!db) {
       setErrorMessage('Database not initialized');
       return;
@@ -76,7 +71,6 @@ export default function BarChartView({ db }: BarChartViewProps): JSX.Element {
     >
       <CardContent sx={{ p: 4 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-          {/* <BarChartIcon sx={{ fontSize: 32, color: 'primary.main', mr: 2 }} /> */}
           <Typography variant="h4" component="h2" sx={{ fontWeight: 700, color: 'text.primary' }}>
             📈 Monthly Costs Overview
           </Typography>
@@ -122,7 +116,7 @@ export default function BarChartView({ db }: BarChartViewProps): JSX.Element {
           <Select
             value={currency}
             label="Currency"
-            onChange={(e) => setCurrency(e.target.value as Currency)}
+            onChange={(e) => setCurrency(e.target.value)}
           >
             <MenuItem value="USD">USD</MenuItem>
             <MenuItem value="ILS">ILS</MenuItem>
@@ -135,7 +129,6 @@ export default function BarChartView({ db }: BarChartViewProps): JSX.Element {
               variant="contained"
               onClick={handleGetChart}
               disabled={!db || loading}
-              // startIcon={loading ? <CircularProgress size={20} color="inherit" /> : <GetAppIcon />}
               sx={{
                 borderRadius: 2,
                 px: 3,
@@ -192,7 +185,7 @@ export default function BarChartView({ db }: BarChartViewProps): JSX.Element {
                         axisLine={{ stroke: '#e0e0e0' }}
                       />
                       <Tooltip 
-                        formatter={(value: number) => `${value.toFixed(2)} ${currency}`}
+                        formatter={(value) => `${value.toFixed(2)} ${currency}`}
                         contentStyle={{ 
                           borderRadius: 8,
                           border: '1px solid #e0e0e0',

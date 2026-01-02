@@ -1,5 +1,5 @@
 /**
- * StatCard.tsx - Statistics card component
+ * StatCard.jsx - Statistics card component
  */
 
 import React from 'react';
@@ -7,18 +7,16 @@ import { Card, CardContent, Typography, Box } from '@mui/material';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import TrendingDownIcon from '@mui/icons-material/TrendingDown';
 
-interface StatCardProps {
-  title: string;
-  value: string;
-  change?: number;
-  icon?: React.ReactNode;
-  color?: string;
-}
-
 /**
  * StatCard component
+ * @param {Object} props - Component props
+ * @param {string} props.title - Card title
+ * @param {string} props.value - Card value
+ * @param {number} [props.change] - Optional change percentage
+ * @param {React.ReactNode} [props.icon] - Optional icon
+ * @param {string} [props.color='#6366f1'] - Card color
  */
-export default function StatCard({ title, value, change, icon, color = '#6366f1' }: StatCardProps): JSX.Element {
+export default function StatCard({ title, value, change, icon, color = '#6366f1' }) {
   const isPositive = change !== undefined && change >= 0;
 
   return (
