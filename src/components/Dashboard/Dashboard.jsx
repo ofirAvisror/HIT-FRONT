@@ -51,17 +51,39 @@ export default function Dashboard({ db }) {
         setLoading(true);
         setError('');
         
-        // Load categories to get color mapping
-        const categories = await db.getCategories();
-        const colorMap = {};
-        categories.forEach(function(category) {
-          colorMap[category.name] = category.color || COLORS[0];
-        });
-        setCategoryColorMap(colorMap);
-        
         // Load statistics
         const statistics = await db.getStatistics(currentYear, currentMonth, currency);
         setStats(statistics);
+        
+        // Load categories to get color mapping
+        const categoriesFromStore = await db.getCategories();
+        
+        // Get all unique categories from existing costs
+        const allCosts = await db.getAllCosts();
+        const costCategories = Array.from(new Set(allCosts.map(c => c.category)));
+        
+        // Create a map to combine categories from both sources
+        const categoryMap = new Map();
+        
+        // Add categories from store (with their colors)
+        categoriesFromStore.forEach(function(cat) {
+          categoryMap.set(cat.name, cat.color);
+        });
+        
+        // Add categories from costs with default color if not already in map
+        costCategories.forEach(function(catName) {
+          if (!categoryMap.has(catName)) {
+            categoryMap.set(catName, '#6366f1'); // Default blue color
+          }
+        });
+        
+        // Convert map to object
+        const colorMap = {};
+        categoryMap.forEach(function(color, name) {
+          colorMap[name] = color;
+        });
+        
+        setCategoryColorMap(colorMap);
       } catch (err) {
         const errorMsg = t('messages.failedToLoad') + ' statistics: ' + (err instanceof Error ? err.message : 'Unknown error');
         setError(errorMsg);
