@@ -32,6 +32,7 @@ export default function Dashboard({ db }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [stats, setStats] = useState(null);
+  const [categoryColorMap, setCategoryColorMap] = useState({});
   const [currency] = useState('USD');
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
@@ -49,6 +50,16 @@ export default function Dashboard({ db }) {
       try {
         setLoading(true);
         setError('');
+        
+        // Load categories to get color mapping
+        const categories = await db.getCategories();
+        const colorMap = {};
+        categories.forEach(function(category) {
+          colorMap[category.name] = category.color || COLORS[0];
+        });
+        setCategoryColorMap(colorMap);
+        
+        // Load statistics
         const statistics = await db.getStatistics(currentYear, currentMonth, currency);
         setStats(statistics);
       } catch (err) {
@@ -182,7 +193,10 @@ export default function Dashboard({ db }) {
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={categoryColorMap[entry.name] || COLORS[index % COLORS.length]} 
+                    />
                   ))}
                 </Pie>
                 <Tooltip formatter={(value) => `${value.toFixed(2)} ${currency}`} />
