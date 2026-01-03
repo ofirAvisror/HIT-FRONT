@@ -34,6 +34,7 @@ export default function BarChartView({ db }) {
   const { t } = useTranslation();
   const [year, setYear] = useState(new Date().getFullYear());
   const [currency, setCurrency] = useState('USD');
+  const [displayedCurrency, setDisplayedCurrency] = useState('USD'); // Currency actually used in the chart
   const [chartData, setChartData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -54,6 +55,7 @@ export default function BarChartView({ db }) {
     try {
       const data = await getBarChartData(year, currency, db);
       setChartData(data);
+      setDisplayedCurrency(currency); // Update displayed currency after successful fetch
     } catch (error) {
       setErrorMessage(t('messages.failedToGet') + ' chart data: ' + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
@@ -187,7 +189,7 @@ export default function BarChartView({ db }) {
                         axisLine={{ stroke: '#e0e0e0' }}
                       />
                       <Tooltip 
-                        formatter={(value) => `${value.toFixed(2)} ${currency}`}
+                        formatter={(value) => `${value.toFixed(2)} ${displayedCurrency}`}
                         contentStyle={{ 
                           borderRadius: 8,
                           border: '1px solid #e0e0e0',
@@ -200,7 +202,7 @@ export default function BarChartView({ db }) {
                       <Bar 
                         dataKey="total" 
                         fill="url(#colorGradient)" 
-                        name={`Total (${currency})`}
+                        name={`Total (${displayedCurrency})`}
                         radius={[8, 8, 0, 0]}
                       />
                       <defs>

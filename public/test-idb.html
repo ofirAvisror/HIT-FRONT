@@ -56,7 +56,7 @@
        try {
          // Test 1: Open database
          output.innerHTML += '<div class="test-result">Test 1: Opening database...</div>';
-         const db = await idb.openCostsDB("costsdb", 1);
+         const db = await idb.openCostsDB("costsdb", 2);
          
          if (db) {
            output.innerHTML += '<div class="test-result"><span class="success">✓ Database opened successfully</span></div>';
