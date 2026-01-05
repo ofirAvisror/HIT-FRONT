@@ -77,7 +77,20 @@
     "byCategory": "By Category",
     "goalName": "Goal Name",
     "targetAmount": "Target Amount",
-    "targetDate": "Target Date"
+    "targetDate": "Target Date",
+    "placeholders": {
+      "sum": "Enter amount (e.g., 100.50)",
+      "category": "Enter or select a category",
+      "description": "Enter a detailed description of the transaction"
+    },
+    "tooltips": {
+      "transactionType": "Select the type of transaction: expense, income, or savings",
+      "savingsAction": "Select action: deposit or withdrawal",
+      "sum": "Enter a positive amount. Decimals are allowed (e.g., 99.99)",
+      "currency": "Select the currency for this transaction",
+      "category": "Enter a new category or select from existing categories",
+      "description": "A detailed description will help you track the transaction in the future"
+    }
   },
   "messages": {
     "databaseNotInitialized": "Database not initialized",

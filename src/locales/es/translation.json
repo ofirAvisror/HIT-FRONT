@@ -77,7 +77,20 @@
     "byCategory": "Por Categoría",
     "goalName": "Nombre del Objetivo",
     "targetAmount": "Cantidad Objetivo",
-    "targetDate": "Fecha Objetivo"
+    "targetDate": "Fecha Objetivo",
+    "placeholders": {
+      "sum": "Ingrese cantidad (ej., 100.50)",
+      "category": "Ingrese o seleccione una categoría",
+      "description": "Ingrese una descripción detallada de la transacción"
+    },
+    "tooltips": {
+      "transactionType": "Seleccione el tipo de transacción: gasto, ingreso o ahorros",
+      "savingsAction": "Seleccione acción: depósito o retiro",
+      "sum": "Ingrese una cantidad positiva. Se permiten decimales (ej., 99.99)",
+      "currency": "Seleccione la moneda para esta transacción",
+      "category": "Ingrese una nueva categoría o seleccione de categorías existentes",
+      "description": "Una descripción detallada le ayudará a rastrear la transacción en el futuro"
+    }
   },
   "messages": {
     "databaseNotInitialized": "Base de datos no inicializada",
