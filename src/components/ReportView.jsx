@@ -165,13 +165,13 @@ export default function ReportView({ db }) {
         {report && (
           <Fade in={!!report} timeout={500}>
             <Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3, flexWrap: 'wrap', gap: 2 }}>
                 <Typography variant="h5" sx={{ fontWeight: 600, color: 'text.primary' }}>
                   {t('report.reportFor', { month: monthNames[month - 1], year: year })}
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
                   <Chip 
-                    label={`${report.costs.length} ${t('common.items')}`}
+                    label={`${report.expenses.length + report.incomes.length + report.savings.deposits.length + report.savings.withdrawals.length} ${t('common.items')}`}
                     color="primary"
                     sx={{ fontWeight: 600 }}
                   />
@@ -186,7 +186,86 @@ export default function ReportView({ db }) {
                 </Box>
               </Box>
 
-              {report.costs.length === 0 ? (
+              {/* Summary Cards */}
+              <Box sx={{ display: 'flex', gap: 2, mb: 3, flexWrap: 'wrap' }}>
+                <Paper
+                  elevation={0}
+                  sx={{ 
+                    p: 2.5, 
+                    flex: 1,
+                    minWidth: 200,
+                    bgcolor: 'error.light',
+                    borderRadius: 2,
+                    boxShadow: 2,
+                  }}
+                >
+                  <Typography variant="body2" sx={{ color: 'error.contrastText', mb: 0.5, opacity: 0.9 }}>
+                    {t('report.totalExpenses')}
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: 'error.contrastText', fontWeight: 700 }}>
+                    {report.totals.expenses.toFixed(2)} {report.totals.currency}
+                  </Typography>
+                </Paper>
+
+                <Paper
+                  elevation={0}
+                  sx={{ 
+                    p: 2.5, 
+                    flex: 1,
+                    minWidth: 200,
+                    bgcolor: 'success.light',
+                    borderRadius: 2,
+                    boxShadow: 2,
+                  }}
+                >
+                  <Typography variant="body2" sx={{ color: 'success.contrastText', mb: 0.5, opacity: 0.9 }}>
+                    {t('report.totalIncomes')}
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: 'success.contrastText', fontWeight: 700 }}>
+                    {report.totals.incomes.toFixed(2)} {report.totals.currency}
+                  </Typography>
+                </Paper>
+
+                <Paper
+                  elevation={0}
+                  sx={{ 
+                    p: 2.5, 
+                    flex: 1,
+                    minWidth: 200,
+                    bgcolor: 'info.light',
+                    borderRadius: 2,
+                    boxShadow: 2,
+                  }}
+                >
+                  <Typography variant="body2" sx={{ color: 'info.contrastText', mb: 0.5, opacity: 0.9 }}>
+                    {t('report.totalSavings')}
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: 'info.contrastText', fontWeight: 700 }}>
+                    {report.totals.savings.toFixed(2)} {report.totals.currency}
+                  </Typography>
+                </Paper>
+
+                <Paper
+                  elevation={0}
+                  sx={{ 
+                    p: 2.5, 
+                    flex: 1,
+                    minWidth: 200,
+                    bgcolor: report.totals.balance >= 0 ? 'success.main' : 'error.main',
+                    borderRadius: 2,
+                    boxShadow: 2,
+                  }}
+                >
+                  <Typography variant="body2" sx={{ color: 'white', mb: 0.5, opacity: 0.9 }}>
+                    {t('report.balance')}
+                  </Typography>
+                  <Typography variant="h5" sx={{ color: 'white', fontWeight: 700 }}>
+                    {report.totals.balance.toFixed(2)} {report.totals.currency}
+                  </Typography>
+                </Paper>
+              </Box>
+
+              {report.expenses.length === 0 && report.incomes.length === 0 && report.savings.deposits.length === 0 && report.savings.withdrawals.length === 0 ? (
                 <Paper 
                   elevation={0}
                   sx={{ 
@@ -204,72 +283,195 @@ export default function ReportView({ db }) {
                 </Paper>
               ) : (
                 <>
-                  <TableContainer 
-                    component={Paper}
-                    elevation={0}
-                    sx={{ 
-                      borderRadius: 2,
-                      border: '1px solid',
-                      borderColor: 'divider',
-                      mb: 3,
-                      bgcolor: 'background.paper',
-                    }}
-                  >
-                    <Table>
-                      <TableHead>
-                        <TableRow sx={{ bgcolor: 'primary.main' }}>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.day')}</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.sum')}</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.currency')}</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.category')}</TableCell>
-                          <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.description')}</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {report.costs.map((cost, index) => (
-                          <TableRow 
-                            key={index}
-                            sx={{ 
-                              '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
-                              '&:hover': { bgcolor: 'action.selected' },
-                            }}
-                          >
-                            <TableCell>
-                              <Chip label={cost.Date.day} size="small" color="primary" variant="outlined" />
-                            </TableCell>
-                            <TableCell sx={{ fontWeight: 600, color: 'primary.main' }}>
-                              {cost.sum.toFixed(2)}
-                            </TableCell>
-                            <TableCell>
-                              <Chip label={cost.currency} size="small" />
-                            </TableCell>
-                            <TableCell>{cost.category}</TableCell>
-                            <TableCell>{cost.description}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-
-                  <Paper
-                    elevation={0}
-                    sx={{ 
-                      p: 3, 
-                      bgcolor: 'primary.main',
-                      borderRadius: 2,
-                      background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                      boxShadow: 4,
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <Typography variant="h6" sx={{ color: 'white', fontWeight: 600 }}>
-                        {t('report.totalAmount')}
+                  {/* Expenses Table */}
+                  {report.expenses.length > 0 && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        {t('report.expenses')}
                       </Typography>
-                      <Typography variant="h4" sx={{ color: 'white', fontWeight: 700 }}>
-                        {report.total.total.toFixed(2)} {report.total.currency}
-                      </Typography>
+                      <TableContainer 
+                        component={Paper}
+                        elevation={0}
+                        sx={{ 
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          bgcolor: 'background.paper',
+                        }}
+                      >
+                        <Table>
+                          <TableHead>
+                            <TableRow sx={{ bgcolor: 'error.main' }}>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.day')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.sum')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.currency')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.category')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.description')}</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {report.expenses.map((cost, index) => (
+                              <TableRow 
+                                key={index}
+                                sx={{ 
+                                  '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                                  '&:hover': { bgcolor: 'action.selected' },
+                                }}
+                              >
+                                <TableCell>
+                                  <Chip label={cost.Date.day} size="small" color="error" variant="outlined" />
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: 'error.main' }}>
+                                  {cost.sum.toFixed(2)}
+                                </TableCell>
+                                <TableCell>
+                                  <Chip label={cost.currency} size="small" />
+                                </TableCell>
+                                <TableCell>{cost.category}</TableCell>
+                                <TableCell>{cost.description}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
                     </Box>
-                  </Paper>
+                  )}
+
+                  {/* Incomes Table */}
+                  {report.incomes.length > 0 && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        {t('report.incomes')}
+                      </Typography>
+                      <TableContainer 
+                        component={Paper}
+                        elevation={0}
+                        sx={{ 
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          bgcolor: 'background.paper',
+                        }}
+                      >
+                        <Table>
+                          <TableHead>
+                            <TableRow sx={{ bgcolor: 'success.main' }}>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.day')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.sum')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.currency')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.category')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.description')}</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {report.incomes.map((income, index) => (
+                              <TableRow 
+                                key={index}
+                                sx={{ 
+                                  '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                                  '&:hover': { bgcolor: 'action.selected' },
+                                }}
+                              >
+                                <TableCell>
+                                  <Chip label={income.Date.day} size="small" color="success" variant="outlined" />
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: 'success.main' }}>
+                                  {income.sum.toFixed(2)}
+                                </TableCell>
+                                <TableCell>
+                                  <Chip label={income.currency} size="small" />
+                                </TableCell>
+                                <TableCell>{income.category}</TableCell>
+                                <TableCell>{income.description}</TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Box>
+                  )}
+
+                  {/* Savings Table */}
+                  {(report.savings.deposits.length > 0 || report.savings.withdrawals.length > 0) && (
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+                        {t('report.savings')}
+                      </Typography>
+                      <TableContainer 
+                        component={Paper}
+                        elevation={0}
+                        sx={{ 
+                          borderRadius: 2,
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          bgcolor: 'background.paper',
+                        }}
+                      >
+                        <Table>
+                          <TableHead>
+                            <TableRow sx={{ bgcolor: 'info.main' }}>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.day')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.sum')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.currency')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.category')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>{t('common.description')}</TableCell>
+                              <TableCell sx={{ color: 'white', fontWeight: 600 }}>Type</TableCell>
+                            </TableRow>
+                          </TableHead>
+                          <TableBody>
+                            {report.savings.deposits.map((deposit, index) => (
+                              <TableRow 
+                                key={`deposit-${index}`}
+                                sx={{ 
+                                  '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                                  '&:hover': { bgcolor: 'action.selected' },
+                                }}
+                              >
+                                <TableCell>
+                                  <Chip label={deposit.Date.day} size="small" color="info" variant="outlined" />
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: 'info.main' }}>
+                                  {deposit.sum.toFixed(2)}
+                                </TableCell>
+                                <TableCell>
+                                  <Chip label={deposit.currency} size="small" />
+                                </TableCell>
+                                <TableCell>{deposit.category}</TableCell>
+                                <TableCell>{deposit.description}</TableCell>
+                                <TableCell>
+                                  <Chip label={t('forms.deposit')} size="small" color="success" />
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                            {report.savings.withdrawals.map((withdrawal, index) => (
+                              <TableRow 
+                                key={`withdrawal-${index}`}
+                                sx={{ 
+                                  '&:nth-of-type(odd)': { bgcolor: 'action.hover' },
+                                  '&:hover': { bgcolor: 'action.selected' },
+                                }}
+                              >
+                                <TableCell>
+                                  <Chip label={withdrawal.Date.day} size="small" color="info" variant="outlined" />
+                                </TableCell>
+                                <TableCell sx={{ fontWeight: 600, color: 'error.main' }}>
+                                  -{withdrawal.sum.toFixed(2)}
+                                </TableCell>
+                                <TableCell>
+                                  <Chip label={withdrawal.currency} size="small" />
+                                </TableCell>
+                                <TableCell>{withdrawal.category}</TableCell>
+                                <TableCell>{withdrawal.description}</TableCell>
+                                <TableCell>
+                                  <Chip label={t('forms.withdrawal')} size="small" color="error" />
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </TableContainer>
+                    </Box>
+                  )}
                 </>
               )}
             </Box>

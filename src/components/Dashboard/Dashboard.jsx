@@ -94,7 +94,7 @@ export default function Dashboard({ db }) {
     }
 
     loadStats();
-  }, [db, currentYear, currentMonth, currency]);
+  }, [db, currentYear, currentMonth, currency, t]);
 
   if (!db) {
     return (
@@ -157,7 +157,34 @@ export default function Dashboard({ db }) {
             value={`${stats.totalThisMonth.toFixed(2)} ${stats.currency}`}
             change={stats.changePercentage}
             icon={<AttachMoneyIcon sx={{ fontSize: 32 }} />}
-            color="#6366f1"
+            color="#ef4444"
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            title={t('dashboard.totalIncomes')}
+            value={`${stats.totalIncomes.toFixed(2)} ${stats.currency}`}
+            icon={<TrendingUpIcon sx={{ fontSize: 32 }} />}
+            color="#10b981"
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            title={t('dashboard.totalSavings')}
+            value={`${stats.totalSavings.toFixed(2)} ${stats.currency}`}
+            icon={<CategoryIcon sx={{ fontSize: 32 }} />}
+            color="#3b82f6"
+          />
+        </Grid>
+        
+        <Grid item xs={12} sm={6} md={3}>
+          <StatCard
+            title={t('dashboard.balance')}
+            value={`${stats.balance.toFixed(2)} ${stats.currency}`}
+            icon={<AttachMoneyIcon sx={{ fontSize: 32 }} />}
+            color={stats.balance >= 0 ? "#10b981" : "#ef4444"}
           />
         </Grid>
         
@@ -166,7 +193,7 @@ export default function Dashboard({ db }) {
             title={t('dashboard.averageDaily')}
             value={`${stats.averageDaily.toFixed(2)} ${stats.currency}`}
             icon={<CalendarTodayIcon sx={{ fontSize: 32 }} />}
-            color="#10b981"
+            color="#f59e0b"
           />
         </Grid>
         
@@ -175,7 +202,7 @@ export default function Dashboard({ db }) {
             title={t('dashboard.lastMonthTotal')}
             value={`${stats.totalLastMonth.toFixed(2)} ${stats.currency}`}
             icon={<TrendingUpIcon sx={{ fontSize: 32 }} />}
-            color="#f59e0b"
+            color="#8b5cf6"
           />
         </Grid>
         

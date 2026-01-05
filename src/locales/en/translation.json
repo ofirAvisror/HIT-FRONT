@@ -1,7 +1,7 @@
 {
   "navigation": {
     "dashboard": "Dashboard",
-    "addCost": "Add Cost",
+    "addCost": "Add Transaction",
     "report": "Report",
     "pieChart": "Pie Chart",
     "barChart": "Bar Chart",
@@ -9,7 +9,8 @@
     "budget": "Budget",
     "filters": "Filters",
     "notifications": "Notifications",
-    "settings": "Settings"
+    "settings": "Settings",
+    "savingsGoals": "Savings Goals"
   },
   "common": {
     "costManager": "Cost Manager",
@@ -55,8 +56,15 @@
     "expenses": "Expenses"
   },
   "forms": {
-    "addCostItem": "Add Cost Item",
-    "addNewCostItem": "➕ Add New Cost Item",
+    "addCostItem": "Add Transaction",
+    "addNewCostItem": "➕ Add New Transaction",
+    "transactionType": "Transaction Type",
+    "expense": "Expense",
+    "income": "Income",
+    "savings": "Savings",
+    "savingsAction": "Savings Action",
+    "deposit": "Deposit",
+    "withdrawal": "Withdrawal",
     "pleaseEnter": "Please enter",
     "pleaseSelect": "Please select",
     "pleaseEnterValid": "Please enter a valid",
@@ -66,7 +74,10 @@
     "budgetType": "Budget Type",
     "monthly": "Monthly",
     "yearly": "Yearly",
-    "byCategory": "By Category"
+    "byCategory": "By Category",
+    "goalName": "Goal Name",
+    "targetAmount": "Target Amount",
+    "targetDate": "Target Date"
   },
   "messages": {
     "databaseNotInitialized": "Database not initialized",
@@ -110,9 +121,12 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "totalThisMonth": "Total This Month",
-    "averageDaily": "Average Daily",
-    "lastMonthTotal": "Last Month Total",
+    "totalThisMonth": "Total Expenses This Month",
+    "totalIncomes": "Total Incomes This Month",
+    "totalSavings": "Total Savings This Month",
+    "balance": "Balance (Income - Expenses)",
+    "averageDaily": "Average Daily Expenses",
+    "lastMonthTotal": "Last Month Total Expenses",
     "categories": "Categories",
     "expensesByCategory": "Expenses by Category",
     "increase": "increase",
@@ -122,7 +136,16 @@
     "title": "📊 Monthly Report",
     "getReport": "Get Report",
     "reportFor": "Report for {{month}} {{year}}",
-    "totalAmount": "Total Amount"
+    "totalAmount": "Total Amount",
+    "totalExpenses": "Total Expenses",
+    "totalIncomes": "Total Incomes",
+    "totalSavings": "Total Savings",
+    "balance": "Balance (Income - Expenses)",
+    "expenses": "Expenses",
+    "incomes": "Incomes",
+    "savings": "Savings",
+    "deposits": "Deposits",
+    "withdrawals": "Withdrawals"
   },
   "charts": {
     "costsByCategory": "🥧 Costs by Category",
@@ -205,6 +228,24 @@
     "ils": "ILS - Israeli Shekel",
     "gbp": "GBP - British Pound",
     "euro": "EURO - Euro"
+  },
+  "savingsGoals": {
+    "title": "Savings Goals",
+    "addGoal": "Add Goal",
+    "addNewGoal": "Add New Savings Goal",
+    "editGoal": "Edit Goal",
+    "deleteGoal": "Delete Goal",
+    "goalName": "Goal Name",
+    "targetAmount": "Target Amount",
+    "targetDate": "Target Date",
+    "currentProgress": "Current Progress",
+    "progress": "{{current}} / {{target}} {{currency}}",
+    "percentage": "{{percentage}}%",
+    "noGoalsYet": "No savings goals yet. Add your first goal!",
+    "goalAdded": "Savings goal added successfully",
+    "goalUpdated": "Savings goal updated successfully",
+    "goalDeleted": "Savings goal deleted successfully",
+    "areYouSureDelete": "Are you sure you want to delete \"{{name}}\"? This action cannot be undone."
   }
 }
 

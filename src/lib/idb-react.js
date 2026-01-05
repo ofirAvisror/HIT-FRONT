@@ -38,6 +38,7 @@ export function openCostsDB(databaseName, databaseVersion) {
               currency: cost.currency,
               category: cost.category,
               description: cost.description,
+              type: cost.type || 'expense', // Default to 'expense' for backward compatibility
               date: {
                 year: now.getFullYear(),
                 month: now.getMonth() + 1,
@@ -105,35 +106,82 @@ export function openCostsDB(databaseName, databaseVersion) {
                     }
                     cursor.continue();
                   } else {
-                    // All items processed, convert currencies and create report
-                    const convertedCosts = costs.map(function (cost) {
+                    // All items processed, separate by type
+                    const expenses = [];
+                    const incomes = [];
+                    const savingsDeposits = [];
+                    const savingsWithdrawals = [];
+
+                    costs.forEach(function (cost) {
                       // Convert to USD first, then to target currency
                       const amountInUSD = cost.sum / rates[cost.currency];
                       const convertedSum = amountInUSD * rates[currency];
 
-                      return {
+                      const convertedItem = {
                         sum: convertedSum,
                         currency: currency,
                         category: cost.category,
                         description: cost.description,
+                        type: cost.type || 'expense',
                         Date: {
                           day: cost.date.day,
                         },
                       };
+
+                      const type = cost.type || 'expense';
+                      if (type === 'income') {
+                        incomes.push(convertedItem);
+                      } else if (type === 'savings_deposit') {
+                        savingsDeposits.push(convertedItem);
+                      } else if (type === 'savings_withdrawal') {
+                        savingsWithdrawals.push(convertedItem);
+                      } else {
+                        expenses.push(convertedItem);
+                      }
                     });
 
-                    // Calculate total
-                    const total = convertedCosts.reduce(function (sum, item) {
+                    // Calculate totals
+                    const totalExpenses = expenses.reduce(function (sum, item) {
                       return sum + item.sum;
                     }, 0);
+
+                    const totalIncomes = incomes.reduce(function (sum, item) {
+                      return sum + item.sum;
+                    }, 0);
+
+                    const totalSavingsDeposits = savingsDeposits.reduce(function (sum, item) {
+                      return sum + item.sum;
+                    }, 0);
+
+                    const totalSavingsWithdrawals = savingsWithdrawals.reduce(function (sum, item) {
+                      return sum + item.sum;
+                    }, 0);
+
+                    const totalSavings = totalSavingsDeposits - totalSavingsWithdrawals;
+                    const balance = totalIncomes - totalExpenses;
 
                     const report = {
                       year: year,
                       month: month,
-                      costs: convertedCosts,
+                      expenses: expenses,
+                      incomes: incomes,
+                      savings: {
+                        deposits: savingsDeposits,
+                        withdrawals: savingsWithdrawals,
+                        total: totalSavings,
+                      },
+                      totals: {
+                        expenses: totalExpenses,
+                        incomes: totalIncomes,
+                        savings: totalSavings,
+                        balance: balance,
+                        currency: currency,
+                      },
+                      // Keep backward compatibility
+                      costs: expenses,
                       total: {
                         currency: currency,
-                        total: total,
+                        total: totalExpenses,
                       },
                     };
 
@@ -279,14 +327,18 @@ export function openCostsDB(databaseName, databaseVersion) {
                     dbObject
                       .getReport(lastYear, lastMonth, currency)
                       .then(function (lastReport) {
-                        const totalThisMonth = currentReport.total.total;
-                        const totalLastMonth = lastReport.total.total;
+                        const totalExpensesThisMonth = currentReport.totals.expenses;
+                        const totalExpensesLastMonth = lastReport.totals.expenses;
+                        const totalIncomesThisMonth = currentReport.totals.incomes;
+                        const totalSavingsThisMonth = currentReport.totals.savings;
+                        const balanceThisMonth = currentReport.totals.balance;
+                        
                         const daysInMonth = new Date(year, month, 0).getDate();
-                        const averageDaily = totalThisMonth / daysInMonth;
+                        const averageDaily = totalExpensesThisMonth / daysInMonth;
 
-                        // Calculate by category
+                        // Calculate by category (for expenses)
                         const totalByCategory = {};
-                        currentReport.costs.forEach(function (cost) {
+                        currentReport.expenses.forEach(function (cost) {
                           if (totalByCategory[cost.category]) {
                             totalByCategory[cost.category] += cost.sum;
                           } else {
@@ -294,17 +346,20 @@ export function openCostsDB(databaseName, databaseVersion) {
                           }
                         });
 
-                        // Calculate change percentage
+                        // Calculate change percentage for expenses
                         const changePercentage =
-                          totalLastMonth > 0
-                            ? ((totalThisMonth - totalLastMonth) /
-                                totalLastMonth) *
+                          totalExpensesLastMonth > 0
+                            ? ((totalExpensesThisMonth - totalExpensesLastMonth) /
+                                totalExpensesLastMonth) *
                               100
                             : 0;
 
                         const stats = {
-                          totalThisMonth,
-                          totalLastMonth,
+                          totalThisMonth: totalExpensesThisMonth,
+                          totalLastMonth: totalExpensesLastMonth,
+                          totalIncomes: totalIncomesThisMonth,
+                          totalSavings: totalSavingsThisMonth,
+                          balance: balanceThisMonth,
                           averageDaily,
                           totalByCategory,
                           changePercentage,
@@ -643,6 +698,149 @@ export function openCostsDB(databaseName, databaseVersion) {
             }
           });
         },
+
+        /**
+         * Gets all savings goals
+         * @returns {Promise<Array>} Promise that resolves to array of savings goals
+         */
+        getSavingsGoals: function () {
+          return new Promise(function (resolve, reject) {
+            try {
+              if (!db.objectStoreNames.contains("savings_goals")) {
+                resolve([]);
+                return;
+              }
+
+              const transaction = db.transaction(["savings_goals"], "readonly");
+              const store = transaction.objectStore("savings_goals");
+              const request = store.getAll();
+
+              request.onsuccess = function () {
+                const result = request.result;
+                resolve(Array.isArray(result) ? result : []);
+              };
+
+              request.onerror = function () {
+                console.warn("Error loading savings goals:", request.error);
+                resolve([]);
+              };
+            } catch (error) {
+              console.warn("Error in getSavingsGoals:", error);
+              resolve([]);
+            }
+          });
+        },
+
+        /**
+         * Adds a savings goal
+         * @param {Object} goal - Savings goal object with name, targetAmount, currency, targetDate
+         * @returns {Promise<Object>} Promise that resolves to added goal with ID
+         */
+        addSavingsGoal: function (goal) {
+          return new Promise(function (resolve, reject) {
+            try {
+              if (!db.objectStoreNames.contains("savings_goals")) {
+                reject(
+                  new Error(
+                    "Savings goals object store does not exist. Please refresh the page to initialize the database."
+                  )
+                );
+                return;
+              }
+
+              const now = new Date();
+              const goalWithDate = {
+                ...goal,
+                createdAt: {
+                  year: now.getFullYear(),
+                  month: now.getMonth() + 1,
+                  day: now.getDate(),
+                },
+              };
+
+              const transaction = db.transaction(["savings_goals"], "readwrite");
+              const store = transaction.objectStore("savings_goals");
+              const request = store.add(goalWithDate);
+
+              request.onsuccess = function () {
+                const newGoal = {
+                  ...goalWithDate,
+                  id: request.result,
+                };
+                resolve(newGoal);
+              };
+
+              request.onerror = function () {
+                reject(request.error);
+              };
+            } catch (error) {
+              reject(error);
+            }
+          });
+        },
+
+        /**
+         * Updates a savings goal
+         * @param {number} id - The goal ID
+         * @param {Object} goal - Partial goal object with fields to update
+         * @returns {Promise<Object>} Promise that resolves to updated goal
+         */
+        updateSavingsGoal: function (id, goal) {
+          return new Promise(function (resolve, reject) {
+            const transaction = db.transaction(["savings_goals"], "readwrite");
+            const store = transaction.objectStore("savings_goals");
+            const getRequest = store.get(id);
+
+            getRequest.onsuccess = function () {
+              const existing = getRequest.result;
+              if (!existing) {
+                reject(new Error("Savings goal not found"));
+                return;
+              }
+
+              const updated = {
+                ...existing,
+                ...goal,
+                id: existing.id,
+              };
+
+              const updateRequest = store.put(updated);
+
+              updateRequest.onsuccess = function () {
+                resolve(updated);
+              };
+
+              updateRequest.onerror = function () {
+                reject(updateRequest.error);
+              };
+            };
+
+            getRequest.onerror = function () {
+              reject(getRequest.error);
+            };
+          });
+        },
+
+        /**
+         * Deletes a savings goal
+         * @param {number} id - The goal ID
+         * @returns {Promise<void>} Promise that resolves when deletion is complete
+         */
+        deleteSavingsGoal: function (id) {
+          return new Promise(function (resolve, reject) {
+            const transaction = db.transaction(["savings_goals"], "readwrite");
+            const store = transaction.objectStore("savings_goals");
+            const request = store.delete(id);
+
+            request.onsuccess = function () {
+              resolve();
+            };
+
+            request.onerror = function () {
+              reject(request.error);
+            };
+          });
+        },
       };
 
       resolve(dbObject);
@@ -651,12 +849,29 @@ export function openCostsDB(databaseName, databaseVersion) {
     request.onupgradeneeded = function (event) {
       const db = event.target.result;
       const transaction = event.target.transaction;
+      const oldVersion = event.oldVersion;
 
       if (!transaction) return;
 
       // Create object stores if they don't exist
       if (!db.objectStoreNames.contains("costs")) {
         db.createObjectStore("costs", { keyPath: "id", autoIncrement: true });
+      } else if (oldVersion < 3) {
+        // Migrate existing costs to add type field
+        const costsStore = transaction.objectStore("costs");
+        const request = costsStore.openCursor();
+        
+        request.onsuccess = function (event) {
+          const cursor = event.target.result;
+          if (cursor) {
+            const value = cursor.value;
+            if (!value.type) {
+              value.type = 'expense';
+              cursor.update(value);
+            }
+            cursor.continue();
+          }
+        };
       }
 
       if (!db.objectStoreNames.contains("categories")) {
@@ -668,6 +883,10 @@ export function openCostsDB(databaseName, databaseVersion) {
 
       if (!db.objectStoreNames.contains("budgets")) {
         db.createObjectStore("budgets", { keyPath: "id", autoIncrement: true });
+      }
+
+      if (!db.objectStoreNames.contains("savings_goals")) {
+        db.createObjectStore("savings_goals", { keyPath: "id", autoIncrement: true });
       }
     };
   });

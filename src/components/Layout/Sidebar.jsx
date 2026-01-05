@@ -27,6 +27,7 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import SettingsIcon from '@mui/icons-material/Settings';
+import SavingsIcon from '@mui/icons-material/Savings';
 
 const drawerWidth = 280;
 
@@ -56,6 +57,7 @@ export default function Sidebar({ open, onClose, currentView, onViewChange }) {
     { id: 'bar-chart', label: t('navigation.barChart'), icon: <BarChartIcon /> },
     { id: 'categories', label: t('navigation.categories'), icon: <CategoryIcon /> },
     { id: 'budget', label: t('navigation.budget'), icon: <AccountBalanceIcon /> },
+    { id: 'savings-goals', label: t('navigation.savingsGoals'), icon: <SavingsIcon /> },
     { id: 'filters', label: t('navigation.filters'), icon: <FilterListIcon /> },
     { id: 'notifications', label: t('navigation.notifications'), icon: <NotificationsIcon /> },
     { id: 'settings', label: t('navigation.settings'), icon: <SettingsIcon /> },

@@ -19,6 +19,7 @@ import Settings from './components/Settings';
 import Dashboard from './components/Dashboard/Dashboard';
 import CategoriesManager from './components/Categories/CategoriesManager';
 import BudgetManager from './components/Budget/BudgetManager';
+import SavingsGoalsManager from './components/SavingsGoals/SavingsGoalsManager';
 import AdvancedFilters from './components/Filters/AdvancedFilters';
 import NotificationCenter from './components/Notifications/NotificationCenter';
 
@@ -38,7 +39,7 @@ function AppInner() {
   useEffect(function() {
     async function initDB() {
       try {
-        const database = await openCostsDB('costsdb', 2);
+        const database = await openCostsDB('costsdb', 3);
         setDb(database);
         setDbError('');
       } catch (error) {
@@ -47,7 +48,7 @@ function AppInner() {
     }
 
     initDB();
-  }, []);
+  }, [t]);
 
   useEffect(function() {
     // Check budgets periodically
@@ -82,6 +83,8 @@ function AppInner() {
         return <CategoriesManager db={db} />;
       case 'budget':
         return <BudgetManager db={db} />;
+      case 'savings-goals':
+        return <SavingsGoalsManager db={db} />;
       case 'filters':
         return <AdvancedFilters db={db} />;
       case 'notifications':

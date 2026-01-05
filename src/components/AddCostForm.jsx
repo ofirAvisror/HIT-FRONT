@@ -31,6 +31,8 @@ export default function AddCostForm({ db }) {
   const [currency, setCurrency] = useState('USD');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
+  const [transactionType, setTransactionType] = useState('expense');
+  const [savingsAction, setSavingsAction] = useState('deposit');
   const [availableCategories, setAvailableCategories] = useState([]);
 
   /**
@@ -97,11 +99,18 @@ export default function AddCostForm({ db }) {
     }
 
     try {
+      // Determine the type based on transaction type and savings action
+      let type = transactionType;
+      if (transactionType === 'savings') {
+        type = savingsAction === 'deposit' ? 'savings_deposit' : 'savings_withdrawal';
+      }
+
       await db.addCost({
         sum: sumValue,
         currency: currency,
         category: category.trim(),
-        description: description.trim()
+        description: description.trim(),
+        type: type
       });
 
       // Reset form and show success message
@@ -109,6 +118,8 @@ export default function AddCostForm({ db }) {
       setCurrency('USD');
       setCategory('');
       setDescription('');
+      setTransactionType('expense');
+      setSavingsAction('deposit');
       
       // Reload categories to include the new one
       try {
@@ -146,6 +157,51 @@ export default function AddCostForm({ db }) {
         </Box>
 
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          <FormControl 
+            fullWidth 
+            margin="normal" 
+            required
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                borderRadius: 2,
+              },
+            }}
+          >
+            <InputLabel>{t('forms.transactionType')}</InputLabel>
+            <Select
+              value={transactionType}
+              label={t('forms.transactionType')}
+              onChange={(e) => setTransactionType(e.target.value)}
+            >
+              <MenuItem value="expense">{t('forms.expense')}</MenuItem>
+              <MenuItem value="income">{t('forms.income')}</MenuItem>
+              <MenuItem value="savings">{t('forms.savings')}</MenuItem>
+            </Select>
+          </FormControl>
+
+          {transactionType === 'savings' && (
+            <FormControl 
+              fullWidth 
+              margin="normal" 
+              required
+              sx={{
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: 2,
+                },
+              }}
+            >
+              <InputLabel>{t('forms.savingsAction')}</InputLabel>
+              <Select
+                value={savingsAction}
+                label={t('forms.savingsAction')}
+                onChange={(e) => setSavingsAction(e.target.value)}
+              >
+                <MenuItem value="deposit">{t('forms.deposit')}</MenuItem>
+                <MenuItem value="withdrawal">{t('forms.withdrawal')}</MenuItem>
+              </Select>
+            </FormControl>
+          )}
+
           <TextField
             label={t('common.sum')}
             type="number"
