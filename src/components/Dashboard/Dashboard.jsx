@@ -33,7 +33,6 @@ export default function Dashboard({ db }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [stats, setStats] = useState(null);
-  const [categoryColorMap, setCategoryColorMap] = useState({});
   const [currency] = useState('USD');
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
@@ -55,38 +54,6 @@ export default function Dashboard({ db }) {
         // Load statistics
         const statistics = await db.getStatistics(currentYear, currentMonth, currency);
         setStats(statistics);
-        
-        // Load categories to get color mapping
-        const categoriesFromStore = await db.getCategories();
-        
-        // Get all unique categories from existing costs
-        const allCosts = await db.getAllCosts();
-        const costCategories = Array.from(new Set(allCosts.map(c => c.category)));
-        
-        // Create a map to combine categories from both sources
-        const categoryMap = new Map();
-        
-        // Add categories from store (with their colors)
-        categoriesFromStore.forEach(function(cat) {
-          categoryMap.set(cat.name, cat.color);
-        });
-        
-        // Add categories from costs with different default colors if not already in map
-        let colorIndex = 0;
-        costCategories.forEach(function(catName) {
-          if (!categoryMap.has(catName)) {
-            categoryMap.set(catName, COLORS[colorIndex % COLORS.length]);
-            colorIndex++;
-          }
-        });
-        
-        // Convert map to object
-        const colorMap = {};
-        categoryMap.forEach(function(color, name) {
-          colorMap[name] = color;
-        });
-        
-        setCategoryColorMap(colorMap);
       } catch (err) {
         const errorMsg = t('messages.failedToLoad') + ' statistics: ' + (err instanceof Error ? err.message : 'Unknown error');
         setError(errorMsg);
