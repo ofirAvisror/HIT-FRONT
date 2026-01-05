@@ -152,7 +152,13 @@
     "getChart": "Get Chart",
     "clickGetChart": "Click \"Get Chart\" to generate a pie chart for the selected month and year.",
     "monthlyTrends": "Monthly Trends",
-    "monthlyOverview": "Monthly Overview"
+    "monthlyOverview": "Monthly Overview",
+    "startDate": "Start Date",
+    "endDate": "End Date",
+    "selectDateRange": "Select Date Range",
+    "groupBy": "Group By",
+    "byMonths": "By Months",
+    "byDays": "By Days"
   },
   "budget": {
     "title": "Budget Management",

@@ -20,6 +20,7 @@ import {
   Fade
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
+import { useTheme } from '../contexts/ThemeContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getBarChartData } from '../lib/chartHelpers';
 import { motion } from 'framer-motion';
@@ -32,7 +33,14 @@ import { motion } from 'framer-motion';
  */
 export default function BarChartView({ db }) {
   const { t } = useTranslation();
-  const [year, setYear] = useState(new Date().getFullYear());
+  const { mode } = useTheme();
+  const currentDate = new Date();
+  const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+  const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+  
+  const [startDate, setStartDate] = useState(firstDayOfMonth.toISOString().split('T')[0]);
+  const [endDate, setEndDate] = useState(lastDayOfMonth.toISOString().split('T')[0]);
+  const [groupBy, setGroupBy] = useState('months'); // 'months' or 'days'
   const [currency, setCurrency] = useState('USD');
   const [displayedCurrency, setDisplayedCurrency] = useState('USD'); // Currency actually used in the chart
   const [chartData, setChartData] = useState([]);
@@ -48,12 +56,21 @@ export default function BarChartView({ db }) {
       return;
     }
 
+    // Validate date range
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (start > end) {
+      setErrorMessage(t('messages.pleaseEnter') + ' valid date range');
+      return;
+    }
+
     setLoading(true);
     setErrorMessage('');
     setChartData([]);
 
     try {
-      const data = await getBarChartData(year, currency, db);
+      const data = await getBarChartData(start, end, currency, db, groupBy);
       setChartData(data);
       setDisplayedCurrency(currency); // Update displayed currency after successful fetch
     } catch (error) {
@@ -108,12 +125,46 @@ export default function BarChartView({ db }) {
         >
           <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', alignItems: 'center' }}>
         <TextField
-          label={t('common.year')}
-          type="number"
-          value={year}
-          onChange={(e) => setYear(parseInt(e.target.value) || new Date().getFullYear())}
-          inputProps={{ min: 2000, max: 2100 }}
+          label={t('charts.startDate')}
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+            },
+          }}
         />
+
+        <TextField
+          label={t('charts.endDate')}
+          type="date"
+          value={endDate}
+          onChange={(e) => setEndDate(e.target.value)}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              borderRadius: 2,
+            },
+          }}
+        />
+
+        <FormControl sx={{ minWidth: 140 }}>
+          <InputLabel>{t('charts.groupBy')}</InputLabel>
+          <Select
+            value={groupBy}
+            label={t('charts.groupBy')}
+            onChange={(e) => setGroupBy(e.target.value)}
+          >
+            <MenuItem value="months">{t('charts.byMonths')}</MenuItem>
+            <MenuItem value="days">{t('charts.byDays')}</MenuItem>
+          </Select>
+        </FormControl>
 
         <FormControl sx={{ minWidth: 120 }}>
           <InputLabel>{t('common.currency')}</InputLabel>
@@ -178,26 +229,34 @@ export default function BarChartView({ db }) {
                 <Box sx={{ width: '100%', height: 450 }}>
                   <ResponsiveContainer>
                     <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                      <CartesianGrid strokeDasharray="3 3" stroke={mode === 'dark' ? '#334155' : '#e0e0e0'} />
                       <XAxis 
-                        dataKey="month" 
-                        tick={{ fill: '#64748b', fontWeight: 600 }}
-                        axisLine={{ stroke: '#e0e0e0' }}
+                        dataKey={groupBy === 'days' ? 'day' : 'month'} 
+                        tick={{ fill: mode === 'dark' ? '#cbd5e1' : '#64748b', fontWeight: 600 }}
+                        axisLine={{ stroke: mode === 'dark' ? '#334155' : '#e0e0e0' }}
+                        angle={groupBy === 'days' ? -45 : 0}
+                        textAnchor={groupBy === 'days' ? 'end' : 'middle'}
+                        height={groupBy === 'days' ? 80 : 30}
                       />
                       <YAxis 
-                        tick={{ fill: '#64748b', fontWeight: 600 }}
-                        axisLine={{ stroke: '#e0e0e0' }}
+                        tick={{ fill: mode === 'dark' ? '#cbd5e1' : '#64748b', fontWeight: 600 }}
+                        axisLine={{ stroke: mode === 'dark' ? '#334155' : '#e0e0e0' }}
                       />
                       <Tooltip 
                         formatter={(value) => `${value.toFixed(2)} ${displayedCurrency}`}
                         contentStyle={{ 
                           borderRadius: 8,
-                          border: '1px solid #e0e0e0',
+                          border: `1px solid ${mode === 'dark' ? '#334155' : '#e0e0e0'}`,
+                          backgroundColor: mode === 'dark' ? '#1e293b' : '#ffffff',
+                          color: mode === 'dark' ? '#f1f5f9' : '#1e293b',
+                        }}
+                        labelStyle={{
+                          color: mode === 'dark' ? '#f1f5f9' : '#1e293b',
                         }}
                       />
                       <Legend 
-                        wrapperStyle={{ paddingTop: 20 }}
-                        formatter={(value) => <span style={{ fontWeight: 600 }}>{value}</span>}
+                        wrapperStyle={{ paddingTop: 20, color: mode === 'dark' ? '#f1f5f9' : '#1e293b' }}
+                        formatter={(value) => <span style={{ fontWeight: 600, color: mode === 'dark' ? '#f1f5f9' : '#1e293b' }}>{value}</span>}
                       />
                       <Bar 
                         dataKey="total" 

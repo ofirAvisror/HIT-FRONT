@@ -152,7 +152,13 @@
     "getChart": "קבל תרשים",
     "clickGetChart": "לחץ על \"קבל תרשים\" כדי ליצור תרשים עוגה לחודש ולשנה שנבחרו.",
     "monthlyTrends": "מגמות חודשיות",
-    "monthlyOverview": "סקירה חודשית"
+    "monthlyOverview": "סקירה חודשית",
+    "startDate": "תאריך התחלה",
+    "endDate": "תאריך סיום",
+    "selectDateRange": "בחר טווח תאריכים",
+    "groupBy": "קבץ לפי",
+    "byMonths": "לפי חודשים",
+    "byDays": "לפי ימים"
   },
   "budget": {
     "title": "ניהול תקציב",

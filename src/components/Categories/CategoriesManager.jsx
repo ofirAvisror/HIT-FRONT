@@ -98,8 +98,64 @@ export default function CategoriesManager({ db }) {
         }
       });
       
-      // Convert map to array
+      // Convert map to array and determine dominant type for each category
       const allCategories = Array.from(categoryMap.values());
+      
+      // For each category, determine the dominant transaction type
+      for (let i = 0; i < allCategories.length; i++) {
+        const category = allCategories[i];
+        const categoryTransactions = allCosts.filter(function(cost) {
+          return cost.category === category.name;
+        });
+        
+        if (categoryTransactions.length > 0) {
+          // Count transaction types
+          let expenseCount = 0;
+          let incomeCount = 0;
+          let savingsCount = 0;
+          
+          categoryTransactions.forEach(function(transaction) {
+            const type = transaction.type || 'expense';
+            if (type === 'expense') {
+              expenseCount++;
+            } else if (type === 'income') {
+              incomeCount++;
+            } else if (type === 'savings_deposit' || type === 'savings_withdrawal') {
+              savingsCount++;
+            }
+          });
+          
+          // Determine dominant type
+          const total = expenseCount + incomeCount + savingsCount;
+          if (total > 0) {
+            const expenseRatio = expenseCount / total;
+            const incomeRatio = incomeCount / total;
+            const savingsRatio = savingsCount / total;
+            
+            // If one type is clearly dominant (>50%), use its color
+            if (expenseRatio > 0.5) {
+              category.dominantType = 'expense';
+              category.typeColor = 'error.main';
+            } else if (incomeRatio > 0.5) {
+              category.dominantType = 'income';
+              category.typeColor = 'success.main';
+            } else if (savingsRatio > 0.5) {
+              category.dominantType = 'savings';
+              category.typeColor = 'info.main';
+            } else {
+              // Mixed or equal - use default color
+              category.dominantType = 'mixed';
+              category.typeColor = category.color || '#6366f1';
+            }
+          } else {
+            category.dominantType = 'mixed';
+            category.typeColor = category.color || '#6366f1';
+          }
+        } else {
+          category.dominantType = 'mixed';
+          category.typeColor = category.color || '#6366f1';
+        }
+      }
       
       // Sort by name
       allCategories.sort(function(a, b) {
@@ -316,7 +372,7 @@ export default function CategoriesManager({ db }) {
                           width: 40,
                           height: 40,
                           borderRadius: 2,
-                          bgcolor: category.color || '#6366f1',
+                          bgcolor: category.typeColor || category.color || '#6366f1',
                         }}
                       />
                       <Typography variant="h6" sx={{ fontWeight: 600 }}>

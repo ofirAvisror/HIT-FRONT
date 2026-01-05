@@ -20,7 +20,8 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarToday';
 import CategoryIcon from '@mui/icons-material/Category';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
-const COLORS = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#3b82f6', '#8b5cf6'];
+// Neutral colors for expenses (avoiding green for income and blue for savings)
+const COLORS = ['#FF8042', '#FFBB28', '#FF7C7C', '#FFC658', '#FF6B9D', '#FF8C42', '#FFA500', '#FF6347', '#FF69B4', '#FF8C00'];
 
 /**
  * Dashboard component
@@ -70,10 +71,12 @@ export default function Dashboard({ db }) {
           categoryMap.set(cat.name, cat.color);
         });
         
-        // Add categories from costs with default color if not already in map
+        // Add categories from costs with different default colors if not already in map
+        let colorIndex = 0;
         costCategories.forEach(function(catName) {
           if (!categoryMap.has(catName)) {
-            categoryMap.set(catName, '#6366f1'); // Default blue color
+            categoryMap.set(catName, COLORS[colorIndex % COLORS.length]);
+            colorIndex++;
           }
         });
         
@@ -244,7 +247,7 @@ export default function Dashboard({ db }) {
                   {pieData.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={categoryColorMap[entry.name] || COLORS[index % COLORS.length]} 
+                      fill={COLORS[index % COLORS.length]} 
                     />
                   ))}
                 </Pie>

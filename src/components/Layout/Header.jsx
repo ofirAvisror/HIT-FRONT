@@ -30,6 +30,9 @@ import LanguageIcon from '@mui/icons-material/Language';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { format } from 'date-fns';
+import US from 'country-flag-icons/react/3x2/US';
+import IL from 'country-flag-icons/react/3x2/IL';
+import ES from 'country-flag-icons/react/3x2/ES';
 
 /**
  * Header component
@@ -287,18 +290,39 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
               selected={i18n.language === 'en'}
               sx={{
                 fontWeight: i18n.language === 'en' ? 600 : 400,
+                fontFamily: 'system-ui, -apple-system, sans-serif',
               }}
             >
-              🇺🇸 English
+              <Box sx={{ mr: 1.5, display: 'inline-flex', alignItems: 'center' }}>
+                <US style={{ width: 24, height: 18 }} />
+              </Box>
+              English
             </MenuItem>
             <MenuItem 
               onClick={() => handleLanguageChange('he')} 
               selected={i18n.language === 'he'}
               sx={{
                 fontWeight: i18n.language === 'he' ? 600 : 400,
+                fontFamily: 'system-ui, -apple-system, sans-serif',
               }}
             >
-              🇮🇱 עברית
+              <Box sx={{ mr: 1.5, display: 'inline-flex', alignItems: 'center' }}>
+                <IL style={{ width: 24, height: 18 }} />
+              </Box>
+              Hebrew
+            </MenuItem>
+            <MenuItem 
+              onClick={() => handleLanguageChange('es')} 
+              selected={i18n.language === 'es'}
+              sx={{
+                fontWeight: i18n.language === 'es' ? 600 : 400,
+                fontFamily: 'system-ui, -apple-system, sans-serif',
+              }}
+            >
+              <Box sx={{ mr: 1.5, display: 'inline-flex', alignItems: 'center' }}>
+                <ES style={{ width: 24, height: 18 }} />
+              </Box>
+              Español
             </MenuItem>
           </Menu>
         </Box>

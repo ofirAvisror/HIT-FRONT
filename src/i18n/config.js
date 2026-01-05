@@ -7,10 +7,11 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import translationEN from '../locales/en/translation.json';
 import translationHE from '../locales/he/translation.json';
+import translationES from '../locales/es/translation.json';
 
 // Get saved language from localStorage or default to 'en'
 const savedLanguage = localStorage.getItem('i18nextLng') || 'en';
-const defaultLanguage = savedLanguage === 'he' ? 'he' : 'en';
+const defaultLanguage = (savedLanguage === 'he' || savedLanguage === 'es') ? savedLanguage : 'en';
 
 i18n
   .use(initReactI18next)
@@ -21,6 +22,9 @@ i18n
       },
       he: {
         translation: translationHE
+      },
+      es: {
+        translation: translationES
       }
     },
     lng: defaultLanguage,
