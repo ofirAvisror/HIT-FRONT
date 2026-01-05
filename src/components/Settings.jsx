@@ -21,7 +21,7 @@ import toast from 'react-hot-toast';
  */
 export default function Settings() {
   const { t } = useTranslation();
-  const [exchangeRateUrl, setExchangeRateUrl] = useState('./exchange-rates.json');
+  const [exchangeRateUrl, setExchangeRateUrl] = useState(process.env.REACT_APP_EXCHANGE_RATE_URL || 'https://gist.githubusercontent.com/Pafestivo/e4e1c962472306b578983a6a0c40828e/raw/exchange-rates.json');
 
   /**
    * Loads the current exchange rate URL from localStorage on mount
@@ -30,6 +30,8 @@ export default function Settings() {
     const savedUrl = localStorage.getItem('exchangeRateUrl');
     if (savedUrl) {
       setExchangeRateUrl(savedUrl);
+    } else {
+      setExchangeRateUrl(process.env.REACT_APP_EXCHANGE_RATE_URL || 'https://gist.githubusercontent.com/Pafestivo/e4e1c962472306b578983a6a0c40828e/raw/exchange-rates.json');
     }
   }, []);
 

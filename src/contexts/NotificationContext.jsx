@@ -2,7 +2,7 @@
  * NotificationContext.jsx - Context for managing notifications
  */
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import i18n from '../i18n/config';
 
 const NotificationContext = createContext(undefined);
@@ -14,6 +14,8 @@ const NotificationContext = createContext(undefined);
  */
 export function NotificationProvider({ children }) {
   const [notifications, setNotifications] = useState([]);
+  const [dismissedNotifications, setDismissedNotifications] = useState(new Set());
+  const dismissedNotificationsRef = useRef(new Set());
 
   useEffect(function() {
     // Load notifications from localStorage
@@ -28,12 +30,31 @@ export function NotificationProvider({ children }) {
         // Ignore
       }
     }
+
+    // Load dismissed notifications from localStorage
+    const savedDismissed = localStorage.getItem('dismissedNotifications');
+    if (savedDismissed) {
+      try {
+        const parsed = JSON.parse(savedDismissed);
+        const dismissedSet = new Set(parsed);
+        setDismissedNotifications(dismissedSet);
+        dismissedNotificationsRef.current = dismissedSet;
+      } catch (error) {
+        // Ignore
+      }
+    }
   }, []);
 
   useEffect(function() {
     // Save notifications to localStorage
     localStorage.setItem('notifications', JSON.stringify(notifications));
   }, [notifications]);
+
+  useEffect(function() {
+    // Save dismissed notifications to localStorage and update ref
+    dismissedNotificationsRef.current = dismissedNotifications;
+    localStorage.setItem('dismissedNotifications', JSON.stringify(Array.from(dismissedNotifications)));
+  }, [dismissedNotifications]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -59,10 +80,26 @@ export function NotificationProvider({ children }) {
         return n.id !== id;
       });
     });
+    // Add to dismissed notifications so it doesn't reappear
+    setDismissedNotifications(function(prev) {
+      const newSet = new Set(prev);
+      newSet.add(id);
+      return newSet;
+    });
   };
 
   const clearAll = function() {
-    setNotifications([]);
+    setNotifications(function(prev) {
+      // Add all current notifications to dismissed set
+      setDismissedNotifications(function(dismissed) {
+        const newSet = new Set(dismissed);
+        prev.forEach(function(n) {
+          newSet.add(n.id);
+        });
+        return newSet;
+      });
+      return [];
+    });
   };
 
   const checkBudgets = async function(db) {
@@ -116,10 +153,10 @@ export function NotificationProvider({ children }) {
         }
       }
 
-      // Add new notifications (avoid duplicates)
+      // Add new notifications (avoid duplicates and dismissed ones)
       setNotifications(function(prev) {
         const existingIds = new Set(prev.map(n => n.id));
-        const toAdd = newNotifications.filter(n => !existingIds.has(n.id));
+        const toAdd = newNotifications.filter(n => !existingIds.has(n.id) && !dismissedNotificationsRef.current.has(n.id));
         return [...prev, ...toAdd];
       });
     } catch (error) {

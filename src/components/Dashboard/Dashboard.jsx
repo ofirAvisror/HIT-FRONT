@@ -32,6 +32,7 @@ export default function Dashboard({ db }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [stats, setStats] = useState(null);
+  const [categoryColorMap, setCategoryColorMap] = useState({});
   const [currency] = useState('USD');
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
@@ -49,8 +50,40 @@ export default function Dashboard({ db }) {
       try {
         setLoading(true);
         setError('');
+        
+        // Load statistics
         const statistics = await db.getStatistics(currentYear, currentMonth, currency);
         setStats(statistics);
+        
+        // Load categories to get color mapping
+        const categoriesFromStore = await db.getCategories();
+        
+        // Get all unique categories from existing costs
+        const allCosts = await db.getAllCosts();
+        const costCategories = Array.from(new Set(allCosts.map(c => c.category)));
+        
+        // Create a map to combine categories from both sources
+        const categoryMap = new Map();
+        
+        // Add categories from store (with their colors)
+        categoriesFromStore.forEach(function(cat) {
+          categoryMap.set(cat.name, cat.color);
+        });
+        
+        // Add categories from costs with default color if not already in map
+        costCategories.forEach(function(catName) {
+          if (!categoryMap.has(catName)) {
+            categoryMap.set(catName, '#6366f1'); // Default blue color
+          }
+        });
+        
+        // Convert map to object
+        const colorMap = {};
+        categoryMap.forEach(function(color, name) {
+          colorMap[name] = color;
+        });
+        
+        setCategoryColorMap(colorMap);
       } catch (err) {
         const errorMsg = t('messages.failedToLoad') + ' statistics: ' + (err instanceof Error ? err.message : 'Unknown error');
         setError(errorMsg);
@@ -182,7 +215,10 @@ export default function Dashboard({ db }) {
                   dataKey="value"
                 >
                   {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={categoryColorMap[entry.name] || COLORS[index % COLORS.length]} 
+                    />
                   ))}
                 </Pie>
                 <Tooltip formatter={(value) => `${value.toFixed(2)} ${currency}`} />
