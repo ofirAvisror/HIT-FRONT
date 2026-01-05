@@ -67,3 +67,4 @@ export async function getBarChartData(year, currency, db) {
   return barData;
 }
 
+
