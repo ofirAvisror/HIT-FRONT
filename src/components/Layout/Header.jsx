@@ -29,6 +29,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import LanguageIcon from '@mui/icons-material/Language';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
+import GetAppIcon from '@mui/icons-material/GetApp';
 import { format } from 'date-fns';
 import US from 'country-flag-icons/react/3x2/US';
 import IL from 'country-flag-icons/react/3x2/IL';
@@ -46,6 +47,8 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
   const { notifications, markAsRead, markAllAsRead, clearNotification } = useNotifications();
   const [languageMenuAnchor, setLanguageMenuAnchor] = React.useState(null);
   const [notificationsMenuAnchor, setNotificationsMenuAnchor] = React.useState(null);
+  const [deferredPrompt, setDeferredPrompt] = React.useState(null);
+  const [isInstalled, setIsInstalled] = React.useState(false);
 
   const handleLanguageMenuOpen = function(event) {
     setLanguageMenuAnchor(event.currentTarget);
@@ -78,6 +81,53 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
 
   const handleClearNotification = function(notificationId) {
     clearNotification(notificationId);
+  };
+
+  // Check if app is already installed
+  React.useEffect(function() {
+    // Check if running as standalone (installed)
+    if (window.matchMedia('(display-mode: standalone)').matches || 
+        window.navigator.standalone === true ||
+        document.referrer.includes('android-app://')) {
+      setIsInstalled(true);
+    }
+  }, []);
+
+  // Listen for beforeinstallprompt event
+  React.useEffect(function() {
+    const handleBeforeInstallPrompt = function(e) {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Stash the event so it can be triggered later
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return function() {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
+  }, []);
+
+  const handleInstallClick = async function() {
+    if (!deferredPrompt) {
+      return;
+    }
+
+    // Show the install prompt
+    deferredPrompt.prompt();
+
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+
+    if (outcome === 'accepted') {
+      console.log('User accepted the install prompt');
+    } else {
+      console.log('User dismissed the install prompt');
+    }
+
+    // Clear the deferredPrompt
+    setDeferredPrompt(null);
   };
 
   const unreadNotifications = notifications.filter(n => !n.read);
@@ -114,6 +164,23 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {/* PWA Install Button */}
+          {!isInstalled && deferredPrompt && (
+            <Tooltip title={t('header.installApp')}>
+              <IconButton 
+                color="inherit"
+                onClick={handleInstallClick}
+                sx={{
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                <GetAppIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+
           <Tooltip title={notificationCount > 0 ? t('header.notifications', { count: notificationCount }) : t('header.noNotifications')}>
             <IconButton 
               color="inherit"

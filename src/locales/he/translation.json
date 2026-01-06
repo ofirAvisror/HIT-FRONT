@@ -240,7 +240,8 @@
     "notifications": "{{count}} התראות",
     "noNotifications": "אין התראות",
     "switchTo": "החלף ל{{mode}} מצב",
-    "changeLanguage": "החלף שפה"
+    "changeLanguage": "החלף שפה",
+    "installApp": "התקן אפליקציה"
   },
   "currency": {
     "usd": "USD - דולר אמריקאי",

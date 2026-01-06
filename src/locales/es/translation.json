@@ -240,7 +240,8 @@
     "notifications": "{{count}} notificaciones",
     "noNotifications": "No hay notificaciones",
     "switchTo": "Cambiar a modo {{mode}}",
-    "changeLanguage": "Cambiar Idioma"
+    "changeLanguage": "Cambiar Idioma",
+    "installApp": "Instalar Aplicación"
   },
   "currency": {
     "usd": "USD - Dólar Estadounidense",
