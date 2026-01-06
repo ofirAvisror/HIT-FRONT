@@ -241,7 +241,8 @@
     "noNotifications": "אין התראות",
     "switchTo": "החלף ל{{mode}} מצב",
     "changeLanguage": "החלף שפה",
-    "installApp": "התקן אפליקציה"
+    "installApp": "התקן אפליקציה",
+    "installAppHint": "התקן אפליקציה (זמין ב-production build)"
   },
   "currency": {
     "usd": "USD - דולר אמריקאי",

@@ -241,7 +241,8 @@
     "noNotifications": "No notifications",
     "switchTo": "Switch to {{mode}} mode",
     "changeLanguage": "Change Language",
-    "installApp": "Install App"
+    "installApp": "Install App",
+    "installAppHint": "Install App (available in production build)"
   },
   "currency": {
     "usd": "USD - US Dollar",

@@ -241,7 +241,8 @@
     "noNotifications": "No hay notificaciones",
     "switchTo": "Cambiar a modo {{mode}}",
     "changeLanguage": "Cambiar Idioma",
-    "installApp": "Instalar Aplicación"
+    "installApp": "Instalar Aplicación",
+    "installAppHint": "Instalar Aplicación (disponible en build de producción)"
   },
   "currency": {
     "usd": "USD - Dólar Estadounidense",

@@ -86,11 +86,11 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
   // Check if app is already installed
   React.useEffect(function() {
     // Check if running as standalone (installed)
-    if (window.matchMedia('(display-mode: standalone)').matches || 
-        window.navigator.standalone === true ||
-        document.referrer.includes('android-app://')) {
-      setIsInstalled(true);
-    }
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://');
+    
+    setIsInstalled(isStandalone);
   }, []);
 
   // Listen for beforeinstallprompt event
@@ -118,13 +118,7 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
     deferredPrompt.prompt();
 
     // Wait for the user to respond to the prompt
-    const { outcome } = await deferredPrompt.userChoice;
-
-    if (outcome === 'accepted') {
-      console.log('User accepted the install prompt');
-    } else {
-      console.log('User dismissed the install prompt');
-    }
+    await deferredPrompt.userChoice;
 
     // Clear the deferredPrompt
     setDeferredPrompt(null);
@@ -165,15 +159,17 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           {/* PWA Install Button */}
-          {!isInstalled && deferredPrompt && (
-            <Tooltip title={t('header.installApp')}>
+          {!isInstalled && (
+            <Tooltip title={deferredPrompt ? t('header.installApp') : t('header.installAppHint')}>
               <IconButton 
                 color="inherit"
                 onClick={handleInstallClick}
+                disabled={!deferredPrompt}
                 sx={{
                   '&:hover': {
                     bgcolor: 'rgba(255, 255, 255, 0.1)',
                   },
+                  opacity: deferredPrompt ? 1 : 0.5,
                 }}
               >
                 <GetAppIcon />
