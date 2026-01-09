@@ -144,18 +144,72 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
   }, [deferredPrompt]);
 
   const handleInstallClick = async function() {
-    if (!deferredPrompt) {
-      return;
+    if (deferredPrompt) {
+      // Show the install prompt using the deferred prompt
+      try {
+        deferredPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log('[PWA] User response to install prompt:', outcome);
+        // Clear the deferredPrompt
+        setDeferredPrompt(null);
+      } catch (error) {
+        console.error('[PWA] Error showing install prompt:', error);
+      }
+    } else {
+      // Try alternative installation methods
+      console.log('[PWA] deferredPrompt not available, trying alternative methods');
+      
+      // Check if app is installable
+      if (window.matchMedia('(display-mode: standalone)').matches) {
+        alert(t('header.alreadyInstalled') || 'האפליקציה כבר מותקנת');
+        return;
+      }
+
+      // Try to trigger browser's install UI
+      // For Chrome/Edge, we can show instructions
+      const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      const isEdge = /Edg/.test(navigator.userAgent);
+      const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+      const isFirefox = /Firefox/.test(navigator.userAgent);
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+      let instructions = '';
+      
+      if (isMobile) {
+        if (isChrome || isEdge) {
+          instructions = t('header.installInstructionsMobile') || 'להתקנה: לחץ על תפריט הדפדפן (⋮) ובחר "הוסף למסך הבית" או "התקן אפליקציה"';
+        } else if (isSafari) {
+          instructions = t('header.installInstructionsSafari') || 'להתקנה: לחץ על כפתור השיתוף (□↑) ובחר "הוסף למסך הבית"';
+        } else {
+          instructions = t('header.installInstructionsGeneric') || 'להתקנה: השתמש בתפריט הדפדפן כדי להוסיף את האפליקציה למסך הבית';
+        }
+      } else {
+        if (isChrome || isEdge) {
+          instructions = t('header.installInstructionsDesktop') || 'להתקנה: לחץ על סמל ההתקנה (⊕) בשורת הכתובת או בתפריט הדפדפן (⋮) > "התקן אפליקציה"';
+        } else if (isFirefox) {
+          instructions = t('header.installInstructionsFirefox') || 'להתקנה: לחץ על סמל ההתקנה בשורת הכתובת או בתפריט הדפדפן';
+        } else {
+          instructions = t('header.installInstructionsGeneric') || 'להתקנה: השתמש בתפריט הדפדפן כדי להתקין את האפליקציה';
+        }
+      }
+
+      // Show instructions to user
+      alert(instructions);
+      
+      // Also log for debugging
+      console.log('[PWA] Installation instructions:', instructions);
+      console.log('[PWA] Browser info:', {
+        userAgent: navigator.userAgent,
+        isChrome,
+        isEdge,
+        isSafari,
+        isFirefox,
+        isMobile,
+        hasServiceWorker: 'serviceWorker' in navigator,
+        isHTTPS: window.location.protocol === 'https:' || window.location.hostname === 'localhost'
+      });
     }
-
-    // Show the install prompt
-    deferredPrompt.prompt();
-
-    // Wait for the user to respond to the prompt
-    await deferredPrompt.userChoice;
-
-    // Clear the deferredPrompt
-    setDeferredPrompt(null);
   };
 
   const unreadNotifications = notifications.filter(n => !n.read);
@@ -192,32 +246,20 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* PWA Install Button */}
+          {/* PWA Install Button - Always enabled */}
           {!isInstalled && (
-            <Tooltip 
-              title={
-                deferredPrompt 
-                  ? t('header.installApp')
-                  : t('header.installAppHint') || 'Install App (available in production build)'
-              }
-            >
-              <span>
-                <IconButton 
-                  color="inherit"
-                  onClick={handleInstallClick}
-                  disabled={!deferredPrompt}
-                  sx={{
-                    '&:hover': {
-                      bgcolor: 'rgba(255, 255, 255, 0.1)',
-                    },
-                    '&.Mui-disabled': {
-                      opacity: 0.5,
-                    },
-                  }}
-                >
-                  <GetAppIcon />
-                </IconButton>
-              </span>
+            <Tooltip title={t('header.installApp')}>
+              <IconButton 
+                color="inherit"
+                onClick={handleInstallClick}
+                sx={{
+                  '&:hover': {
+                    bgcolor: 'rgba(255, 255, 255, 0.1)',
+                  },
+                }}
+              >
+                <GetAppIcon />
+              </IconButton>
             </Tooltip>
           )}
 

@@ -242,7 +242,13 @@
     "switchTo": "Cambiar a modo {{mode}}",
     "changeLanguage": "Cambiar Idioma",
     "installApp": "Instalar Aplicación",
-    "installAppHint": "Instalar Aplicación (disponible en build de producción)"
+    "installAppHint": "Instalar Aplicación (disponible en build de producción)",
+    "alreadyInstalled": "La aplicación ya está instalada",
+    "installInstructionsMobile": "Para instalar: Toca el menú del navegador (⋮) y selecciona \"Agregar a la pantalla de inicio\" o \"Instalar aplicación\"",
+    "installInstructionsSafari": "Para instalar: Toca el botón de compartir (□↑) y selecciona \"Agregar a la pantalla de inicio\"",
+    "installInstructionsDesktop": "Para instalar: Haz clic en el icono de instalación (⊕) en la barra de direcciones o menú del navegador (⋮) > \"Instalar aplicación\"",
+    "installInstructionsFirefox": "Para instalar: Haz clic en el icono de instalación en la barra de direcciones o menú del navegador",
+    "installInstructionsGeneric": "Para instalar: Usa el menú del navegador para instalar la aplicación"
   },
   "currency": {
     "usd": "USD - Dólar Estadounidense",

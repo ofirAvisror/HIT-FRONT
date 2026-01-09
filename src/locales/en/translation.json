@@ -242,7 +242,13 @@
     "switchTo": "Switch to {{mode}} mode",
     "changeLanguage": "Change Language",
     "installApp": "Install App",
-    "installAppHint": "Install App (available in production build)"
+    "installAppHint": "Install App (available in production build)",
+    "alreadyInstalled": "App is already installed",
+    "installInstructionsMobile": "To install: Tap the browser menu (⋮) and select \"Add to Home Screen\" or \"Install App\"",
+    "installInstructionsSafari": "To install: Tap the share button (□↑) and select \"Add to Home Screen\"",
+    "installInstructionsDesktop": "To install: Click the install icon (⊕) in the address bar or browser menu (⋮) > \"Install App\"",
+    "installInstructionsFirefox": "To install: Click the install icon in the address bar or browser menu",
+    "installInstructionsGeneric": "To install: Use the browser menu to install the app"
   },
   "currency": {
     "usd": "USD - US Dollar",
