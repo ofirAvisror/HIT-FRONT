@@ -119,49 +119,212 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
 
     // Comprehensive PWA installability check
     const checkPWAInstallability = async function() {
+      console.log('[PWA] 🔍 Starting comprehensive installability check...');
+      
       const checks = {
         isHTTPS: window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
         hasManifest: document.querySelector('link[rel="manifest"]') !== null,
         hasServiceWorker: 'serviceWorker' in navigator,
         isStandalone: window.matchMedia('(display-mode: standalone)').matches,
-        userAgent: navigator.userAgent
+        userAgent: navigator.userAgent,
+        url: window.location.href
       };
 
       // Check manifest
+      console.log('[PWA] 📄 Checking manifest...');
       try {
         const manifestLink = document.querySelector('link[rel="manifest"]');
         if (manifestLink) {
           const manifestUrl = manifestLink.href;
+          console.log('[PWA] 📄 Manifest link found:', manifestUrl);
+          
           const response = await fetch(manifestUrl);
+          console.log('[PWA] 📄 Manifest fetch response:', {
+            ok: response.ok,
+            status: response.status,
+            statusText: response.statusText,
+            contentType: response.headers.get('content-type')
+          });
+          
           if (response.ok) {
             const manifest = await response.json();
+            console.log('[PWA] 📄 Manifest content:', manifest);
+            
             checks.manifestValid = true;
             checks.manifestIcons = manifest.icons?.length || 0;
             checks.manifestName = manifest.name;
+            checks.manifestShortName = manifest.short_name;
+            checks.manifestStartUrl = manifest.start_url;
+            checks.manifestDisplay = manifest.display;
+            checks.manifestThemeColor = manifest.theme_color;
+            
+            // Validate icons
+            if (manifest.icons && manifest.icons.length > 0) {
+              console.log('[PWA] 🖼️ Validating icons...');
+              checks.iconValidation = [];
+              
+              for (let i = 0; i < manifest.icons.length; i++) {
+                const icon = manifest.icons[i];
+                const iconInfo = {
+                  index: i,
+                  src: icon.src,
+                  sizes: icon.sizes,
+                  type: icon.type,
+                  purpose: icon.purpose
+                };
+                
+                try {
+                  // Try to fetch the icon
+                  const iconUrl = icon.src.startsWith('/') ? icon.src : new URL(icon.src, window.location.origin).pathname;
+                  console.log(`[PWA] 🖼️ Checking icon ${i + 1}:`, iconUrl);
+                  
+                  const iconResponse = await fetch(iconUrl);
+                  iconInfo.exists = iconResponse.ok;
+                  iconInfo.status = iconResponse.status;
+                  iconInfo.contentType = iconResponse.headers.get('content-type');
+                  iconInfo.contentLength = iconResponse.headers.get('content-length');
+                  
+                  if (iconResponse.ok) {
+                    // Try to create an image to check dimensions
+                    const blob = await iconResponse.blob();
+                    iconInfo.blobSize = blob.size;
+                    
+                    const img = new Image();
+                    await new Promise((resolve, reject) => {
+                      img.onload = resolve;
+                      img.onerror = reject;
+                      img.src = URL.createObjectURL(blob);
+                    });
+                    
+                    iconInfo.actualWidth = img.width;
+                    iconInfo.actualHeight = img.height;
+                    iconInfo.expectedSizes = icon.sizes;
+                    
+                    // Check if sizes match
+                    const expectedSize = icon.sizes.split('x')[0];
+                    if (iconInfo.actualWidth !== parseInt(expectedSize) || iconInfo.actualHeight !== parseInt(expectedSize)) {
+                      iconInfo.sizeMismatch = true;
+                      console.warn(`[PWA] ⚠️ Icon size mismatch for ${icon.src}:`, {
+                        expected: `${expectedSize}x${expectedSize}`,
+                        actual: `${iconInfo.actualWidth}x${iconInfo.actualHeight}`
+                      });
+                    } else {
+                      iconInfo.sizeMismatch = false;
+                      console.log(`[PWA] ✅ Icon ${icon.src} size is correct`);
+                    }
+                    
+                    URL.revokeObjectURL(img.src);
+                  } else {
+                    console.error(`[PWA] ❌ Icon ${icon.src} not found:`, iconResponse.status);
+                  }
+                } catch (iconError) {
+                  iconInfo.error = iconError.message;
+                  console.error(`[PWA] ❌ Error checking icon ${icon.src}:`, iconError);
+                }
+                
+                checks.iconValidation.push(iconInfo);
+              }
+            } else {
+              console.warn('[PWA] ⚠️ No icons found in manifest');
+            }
           } else {
             checks.manifestValid = false;
             checks.manifestError = `HTTP ${response.status}`;
+            console.error('[PWA] ❌ Manifest fetch failed:', response.status, response.statusText);
           }
+        } else {
+          checks.manifestValid = false;
+          checks.manifestError = 'Manifest link not found in HTML';
+          console.error('[PWA] ❌ Manifest link not found in document');
         }
       } catch (error) {
         checks.manifestError = error.message;
+        console.error('[PWA] ❌ Error checking manifest:', error);
       }
 
       // Check service worker
+      console.log('[PWA] 🔧 Checking Service Worker...');
       if (checks.hasServiceWorker) {
         try {
           const registration = await navigator.serviceWorker.getRegistration();
           checks.serviceWorkerRegistered = !!registration;
           if (registration) {
-            checks.serviceWorkerState = registration.active?.state || registration.installing?.state || 'unknown';
+            checks.serviceWorkerState = registration.active?.state || registration.installing?.state || registration.waiting?.state || 'unknown';
             checks.serviceWorkerScope = registration.scope;
+            checks.serviceWorkerActive = !!registration.active;
+            checks.serviceWorkerInstalling = !!registration.installing;
+            checks.serviceWorkerWaiting = !!registration.waiting;
+            
+            console.log('[PWA] 🔧 Service Worker registration found:', {
+              scope: registration.scope,
+              active: registration.active ? {
+                state: registration.active.state,
+                scriptURL: registration.active.scriptURL
+              } : null,
+              installing: registration.installing ? {
+                state: registration.installing.state,
+                scriptURL: registration.installing.scriptURL
+              } : null,
+              waiting: registration.waiting ? {
+                state: registration.waiting.state,
+                scriptURL: registration.waiting.scriptURL
+              } : null
+            });
+          } else {
+            console.warn('[PWA] ⚠️ No Service Worker registration found');
+          }
+          
+          // Check controller
+          checks.serviceWorkerController = !!navigator.serviceWorker.controller;
+          if (navigator.serviceWorker.controller) {
+            checks.serviceWorkerControllerState = navigator.serviceWorker.controller.state;
+            checks.serviceWorkerControllerScriptURL = navigator.serviceWorker.controller.scriptURL;
+            console.log('[PWA] 🎮 Service Worker controller:', {
+              state: navigator.serviceWorker.controller.state,
+              scriptURL: navigator.serviceWorker.controller.scriptURL
+            });
+          } else {
+            console.warn('[PWA] ⚠️ No Service Worker controller');
           }
         } catch (error) {
           checks.serviceWorkerError = error.message;
+          console.error('[PWA] ❌ Error checking Service Worker:', error);
         }
+      } else {
+        console.warn('[PWA] ⚠️ Service Worker API not supported');
       }
 
+      // Check PWA installability criteria
+      console.log('[PWA] 📊 PWA Installability Summary:');
       console.log('[PWA] Installability check:', checks);
+      
+      // Detailed analysis
+      const issues = [];
+      if (!checks.isHTTPS) {
+        issues.push('Not running on HTTPS (required for PWA)');
+      }
+      if (!checks.manifestValid) {
+        issues.push('Manifest is invalid or not accessible');
+      }
+      if (!checks.serviceWorkerRegistered) {
+        issues.push('Service Worker is not registered');
+      }
+      if (checks.serviceWorkerRegistered && checks.serviceWorkerState !== 'activated' && checks.serviceWorkerState !== 'activating') {
+        issues.push(`Service Worker state is not ready: ${checks.serviceWorkerState}`);
+      }
+      if (checks.iconValidation && checks.iconValidation.some(icon => icon.sizeMismatch)) {
+        issues.push('Some icons have size mismatches');
+      }
+      if (checks.iconValidation && checks.iconValidation.some(icon => !icon.exists)) {
+        issues.push('Some icons are missing');
+      }
+      
+      if (issues.length > 0) {
+        console.warn('[PWA] ⚠️ Issues found that may prevent installation:');
+        issues.forEach(issue => console.warn(`  - ${issue}`));
+      } else {
+        console.log('[PWA] ✅ All basic requirements met!');
+      }
 
       // Check if browser supports PWA installation
       const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);

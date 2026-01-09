@@ -14,51 +14,109 @@ const urlsToCache = [
 
 // Install event - cache assets
 self.addEventListener('install', function(event) {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] 🔄 Installing service worker...');
+  console.log('[SW] Environment:', {
+    scope: self.registration?.scope || 'unknown',
+    scriptURL: self.location.href,
+    clients: typeof self.clients !== 'undefined'
+  });
+  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('[SW] Opened cache');
+        console.log('[SW] ✅ Opened cache:', CACHE_NAME);
         // Try to cache files, but don't fail if some are missing
         return Promise.allSettled(
           urlsToCache.map(function(url) {
+            console.log('[SW] 📦 Attempting to cache:', url);
             return fetch(url)
               .then(function(response) {
                 if (response.ok) {
+                  console.log('[SW] ✅ Successfully cached:', url, {
+                    status: response.status,
+                    contentType: response.headers.get('content-type'),
+                    size: response.headers.get('content-length') || 'unknown'
+                  });
                   return cache.put(url, response);
+                } else {
+                  console.warn('[SW] ⚠️ Failed to cache (bad response):', url, {
+                    status: response.status,
+                    statusText: response.statusText
+                  });
                 }
               })
               .catch(function(error) {
-                console.warn('[SW] Failed to cache', url, error);
+                console.error('[SW] ❌ Failed to cache:', url, {
+                  error: error.message,
+                  stack: error.stack
+                });
               });
           })
-        );
+        ).then(function(results) {
+          const successful = results.filter(r => r.status === 'fulfilled').length;
+          const failed = results.filter(r => r.status === 'rejected').length;
+          console.log('[SW] 📊 Cache results:', {
+            total: results.length,
+            successful: successful,
+            failed: failed
+          });
+        });
       })
       .then(function() {
-        console.log('[SW] Service worker installed');
+        console.log('[SW] ✅ Service worker installed successfully');
+        console.log('[SW] 🔄 Calling skipWaiting() to activate immediately...');
         return self.skipWaiting();
       })
       .catch(function(error) {
-        console.error('[SW] Cache install failed:', error);
+        console.error('[SW] ❌ Cache install failed:', {
+          error: error.message,
+          stack: error.stack,
+          name: error.name
+        });
       })
   );
 });
 
 // Activate event - clean up old caches
 self.addEventListener('activate', function(event) {
+  console.log('[SW] 🔄 Activating service worker...');
+  
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
-      return Promise.all(
-        cacheNames.map(function(cacheName) {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
+      console.log('[SW] 📋 Found caches:', cacheNames);
+      const oldCaches = cacheNames.filter(name => name !== CACHE_NAME);
+      
+      if (oldCaches.length > 0) {
+        console.log('[SW] 🗑️ Deleting old caches:', oldCaches);
+        return Promise.all(
+          oldCaches.map(function(cacheName) {
+            console.log('[SW] 🗑️ Deleting cache:', cacheName);
+            return caches.delete(cacheName).then(function(deleted) {
+              console.log('[SW]', deleted ? '✅' : '❌', 'Cache deleted:', cacheName);
+              return deleted;
+            });
+          })
+        );
+      } else {
+        console.log('[SW] ✅ No old caches to delete');
+        return Promise.resolve([]);
+      }
+    })
+    .then(function() {
+      console.log('[SW] ✅ Service worker activated');
+      console.log('[SW] 🎮 Claiming clients...');
+      return self.clients.claim();
+    })
+    .then(function() {
+      console.log('[SW] ✅ Clients claimed');
+    })
+    .catch(function(error) {
+      console.error('[SW] ❌ Activation failed:', {
+        error: error.message,
+        stack: error.stack
+      });
     })
   );
-  return self.clients.claim();
 });
 
 // Fetch event - serve from cache, fallback to network
