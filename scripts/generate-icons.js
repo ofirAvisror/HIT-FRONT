@@ -7,38 +7,70 @@
 const fs = require('fs');
 const path = require('path');
 
-// Simple base64 encoded 1x1 transparent PNG as placeholder
-// In production, you should convert the SVG to PNG using a tool like:
-// - Online: https://convertio.co/svg-png/
-// - ImageMagick: magick icon.svg -resize 192x192 icon-192.png
-// - Sharp: npm install sharp, then use sharp to convert
-
-const createPlaceholderPNG = (size) => {
-  // Minimal valid PNG (1x1 transparent pixel)
-  // This is a placeholder - replace with actual converted icon
-  const base64PNG = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
-  return Buffer.from(base64PNG, 'base64');
-};
-
-// For now, create placeholder files
-// User should replace these with actual PNGs converted from icon.svg
 const publicDir = path.join(__dirname, '..', 'public');
+const svgPath = path.join(publicDir, 'icon.svg');
 
-// Create 192x192 placeholder
-fs.writeFileSync(
-  path.join(publicDir, 'icon-192.png'),
-  createPlaceholderPNG(192)
-);
+// Check if sharp is available
+let sharp;
+try {
+  sharp = require('sharp');
+} catch (error) {
+  console.error('❌ Error: sharp is not installed!');
+  console.log('📦 Please install sharp: npm install sharp');
+  console.log('');
+  console.log('Alternatively, you can manually convert the SVG:');
+  console.log('  - Online: https://convertio.co/svg-png/');
+  console.log('  - ImageMagick: magick icon.svg -resize 192x192 icon-192.png');
+  console.log('  - Then: magick icon.svg -resize 512x512 icon-512.png');
+  process.exit(1);
+}
 
-// Create 512x512 placeholder
-fs.writeFileSync(
-  path.join(publicDir, 'icon-512.png'),
-  createPlaceholderPNG(512)
-);
+// Check if SVG exists
+if (!fs.existsSync(svgPath)) {
+  console.error('❌ Error: icon.svg not found at', svgPath);
+  process.exit(1);
+}
 
-console.log('Placeholder icons created!');
-console.log('Please convert icon.svg to PNG format:');
-console.log('  - Online: https://convertio.co/svg-png/');
-console.log('  - ImageMagick: magick icon.svg -resize 192x192 icon-192.png');
-console.log('  - Then: magick icon.svg -resize 512x512 icon-512.png');
+console.log('🔄 Reading SVG file...');
+const svgBuffer = fs.readFileSync(svgPath);
+
+async function generateIcons() {
+  try {
+    console.log('🔄 Generating icon-192.png (192x192)...');
+    await sharp(svgBuffer)
+      .resize(192, 192, {
+        fit: 'contain',
+        background: { r: 255, g: 255, b: 255, alpha: 0 }
+      })
+      .png()
+      .toFile(path.join(publicDir, 'icon-192.png'));
+    console.log('✅ Created icon-192.png');
+
+    console.log('🔄 Generating icon-512.png (512x512)...');
+    await sharp(svgBuffer)
+      .resize(512, 512, {
+        fit: 'contain',
+        background: { r: 255, g: 255, b: 255, alpha: 0 }
+      })
+      .png()
+      .toFile(path.join(publicDir, 'icon-512.png'));
+    console.log('✅ Created icon-512.png');
+
+    // Verify the icons were created correctly
+    const icon192 = await sharp(path.join(publicDir, 'icon-192.png')).metadata();
+    const icon512 = await sharp(path.join(publicDir, 'icon-512.png')).metadata();
+
+    console.log('');
+    console.log('✅ Icons generated successfully!');
+    console.log(`   icon-192.png: ${icon192.width}x${icon192.height} (${(icon192.size / 1024).toFixed(2)} KB)`);
+    console.log(`   icon-512.png: ${icon512.width}x${icon512.height} (${(icon512.size / 1024).toFixed(2)} KB)`);
+    console.log('');
+    console.log('🎉 PWA icons are ready!');
+  } catch (error) {
+    console.error('❌ Error generating icons:', error.message);
+    process.exit(1);
+  }
+}
+
+generateIcons();
 
