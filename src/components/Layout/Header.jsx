@@ -106,36 +106,106 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
   // Listen for beforeinstallprompt event
   React.useEffect(function() {
     const handleBeforeInstallPrompt = function(e) {
-      console.log('[PWA] beforeinstallprompt event fired');
+      console.log('[PWA] ✅ beforeinstallprompt event fired!');
+      console.log('[PWA] Event details:', {
+        platforms: e.platforms,
+        userChoice: e.userChoice
+      });
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later
       setDeferredPrompt(e);
     };
 
-    // Check if service worker is registered
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistration().then(function(registration) {
-        console.log('[PWA] Service Worker registration:', registration ? 'Found' : 'Not found');
-        if (!registration) {
-          console.warn('[PWA] Service Worker not registered. Make sure you are running in production mode or register the service worker manually.');
+    // Comprehensive PWA installability check
+    const checkPWAInstallability = async function() {
+      const checks = {
+        isHTTPS: window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1',
+        hasManifest: document.querySelector('link[rel="manifest"]') !== null,
+        hasServiceWorker: 'serviceWorker' in navigator,
+        isStandalone: window.matchMedia('(display-mode: standalone)').matches,
+        userAgent: navigator.userAgent
+      };
+
+      // Check manifest
+      try {
+        const manifestLink = document.querySelector('link[rel="manifest"]');
+        if (manifestLink) {
+          const manifestUrl = manifestLink.href;
+          const response = await fetch(manifestUrl);
+          if (response.ok) {
+            const manifest = await response.json();
+            checks.manifestValid = true;
+            checks.manifestIcons = manifest.icons?.length || 0;
+            checks.manifestName = manifest.name;
+          } else {
+            checks.manifestValid = false;
+            checks.manifestError = `HTTP ${response.status}`;
+          }
         }
-      });
-    }
+      } catch (error) {
+        checks.manifestError = error.message;
+      }
+
+      // Check service worker
+      if (checks.hasServiceWorker) {
+        try {
+          const registration = await navigator.serviceWorker.getRegistration();
+          checks.serviceWorkerRegistered = !!registration;
+          if (registration) {
+            checks.serviceWorkerState = registration.active?.state || registration.installing?.state || 'unknown';
+            checks.serviceWorkerScope = registration.scope;
+          }
+        } catch (error) {
+          checks.serviceWorkerError = error.message;
+        }
+      }
+
+      console.log('[PWA] Installability check:', checks);
+
+      // Check if browser supports PWA installation
+      const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      const isEdge = /Edg/.test(navigator.userAgent);
+      const supportsPWA = isChrome || isEdge;
+      
+      if (!supportsPWA) {
+        console.warn('[PWA] ⚠️ Browser may not support PWA installation. Chrome and Edge are recommended.');
+      }
+
+      if (!checks.isHTTPS) {
+        console.error('[PWA] ❌ Not running on HTTPS - PWA installation requires HTTPS!');
+      }
+
+      if (!checks.manifestValid) {
+        console.error('[PWA] ❌ Manifest is not valid or not accessible!');
+      }
+
+      if (!checks.serviceWorkerRegistered) {
+        console.error('[PWA] ❌ Service Worker is not registered!');
+      }
+
+      if (checks.isStandalone) {
+        console.log('[PWA] ℹ️ App is already installed (running in standalone mode)');
+      }
+    };
+
+    // Run checks after a short delay to allow everything to load
+    setTimeout(checkPWAInstallability, 1000);
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     // Log if event doesn't fire after a delay (for debugging)
     const timeout = setTimeout(function() {
       if (!deferredPrompt) {
-        console.warn('[PWA] beforeinstallprompt event not fired. Possible reasons:');
-        console.warn('  - Not running on HTTPS (required for PWA)');
-        console.warn('  - App already installed');
-        console.warn('  - Service Worker not registered');
-        console.warn('  - Browser does not support PWA installation');
-        console.warn('  - Running in development mode (some browsers require production)');
+        console.warn('[PWA] ⚠️ beforeinstallprompt event not fired after 5 seconds.');
+        console.warn('[PWA] This is normal if:');
+        console.warn('  - The app was already installed');
+        console.warn('  - The user dismissed the install prompt before');
+        console.warn('  - The browser requires more engagement (visit the site multiple times)');
+        console.warn('  - The manifest or service worker has issues');
+        console.warn('[PWA] The install button will still work and show instructions if needed.');
       }
-    }, 3000);
+    }, 5000);
 
     return function() {
       clearTimeout(timeout);
