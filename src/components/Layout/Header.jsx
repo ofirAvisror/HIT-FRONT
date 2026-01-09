@@ -158,18 +158,16 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* PWA Install Button */}
-          {!isInstalled && (
-            <Tooltip title={deferredPrompt ? t('header.installApp') : t('header.installAppHint')}>
+          {/* PWA Install Button - Only show when installable */}
+          {!isInstalled && deferredPrompt && (
+            <Tooltip title={t('header.installApp')}>
               <IconButton 
                 color="inherit"
                 onClick={handleInstallClick}
-                disabled={!deferredPrompt}
                 sx={{
                   '&:hover': {
                     bgcolor: 'rgba(255, 255, 255, 0.1)',
                   },
-                  opacity: deferredPrompt ? 1 : 0.5,
                 }}
               >
                 <GetAppIcon />
