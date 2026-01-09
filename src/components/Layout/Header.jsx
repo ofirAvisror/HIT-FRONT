@@ -86,11 +86,28 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
   // Check if app is already installed
   React.useEffect(function() {
     // Check if running as standalone (installed)
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                         window.navigator.standalone === true ||
-                         document.referrer.includes('android-app://');
+    const checkIfInstalled = function() {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           window.navigator.standalone === true ||
+                           document.referrer.includes('android-app://');
+      
+      setIsInstalled(isStandalone);
+    };
     
-    setIsInstalled(isStandalone);
+    // Check immediately
+    checkIfInstalled();
+    
+    // Also listen for display-mode changes
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', checkIfInstalled);
+    }
+    
+    return function() {
+      if (mediaQuery.removeEventListener) {
+        mediaQuery.removeEventListener('change', checkIfInstalled);
+      }
+    };
   }, []);
 
   // Listen for beforeinstallprompt event
@@ -195,7 +212,7 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* PWA Install Button - Always enabled */}
+          {/* PWA Install Button - Only show if app is not installed */}
           {!isInstalled && (
             <Tooltip title={t('header.installApp')}>
               <IconButton 
