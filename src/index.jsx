@@ -17,8 +17,8 @@ root.render(
 );
 
 // Register Service Worker for PWA support
-// Only register in production build
-if ('serviceWorker' in navigator && process.env.NODE_ENV === 'production') {
+// Register in production build, but also allow in development for testing
+if ('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
     navigator.serviceWorker.register('/sw.js')
       .then(function(registration) {

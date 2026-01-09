@@ -91,23 +91,57 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
                          document.referrer.includes('android-app://');
     
     setIsInstalled(isStandalone);
+    
+    // Debug logging
+    console.log('[PWA] Installation status:', {
+      isStandalone,
+      displayMode: window.matchMedia('(display-mode: standalone)').matches,
+      navigatorStandalone: window.navigator.standalone,
+      referrer: document.referrer,
+      isProduction: process.env.NODE_ENV === 'production',
+      hasServiceWorker: 'serviceWorker' in navigator
+    });
   }, []);
 
   // Listen for beforeinstallprompt event
   React.useEffect(function() {
     const handleBeforeInstallPrompt = function(e) {
+      console.log('[PWA] beforeinstallprompt event fired');
       // Prevent the mini-infobar from appearing on mobile
       e.preventDefault();
       // Stash the event so it can be triggered later
       setDeferredPrompt(e);
     };
 
+    // Check if service worker is registered
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistration().then(function(registration) {
+        console.log('[PWA] Service Worker registration:', registration ? 'Found' : 'Not found');
+        if (!registration) {
+          console.warn('[PWA] Service Worker not registered. Make sure you are running in production mode or register the service worker manually.');
+        }
+      });
+    }
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
+    // Log if event doesn't fire after a delay (for debugging)
+    const timeout = setTimeout(function() {
+      if (!deferredPrompt) {
+        console.warn('[PWA] beforeinstallprompt event not fired. Possible reasons:');
+        console.warn('  - Not running on HTTPS (required for PWA)');
+        console.warn('  - App already installed');
+        console.warn('  - Service Worker not registered');
+        console.warn('  - Browser does not support PWA installation');
+        console.warn('  - Running in development mode (some browsers require production)');
+      }
+    }, 3000);
+
     return function() {
+      clearTimeout(timeout);
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [deferredPrompt]);
 
   const handleInstallClick = async function() {
     if (!deferredPrompt) {
@@ -158,20 +192,32 @@ export default function Header({ onMenuClick, notificationCount = 0 }) {
         </Typography>
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* PWA Install Button - Only show when installable */}
-          {!isInstalled && deferredPrompt && (
-            <Tooltip title={t('header.installApp')}>
-              <IconButton 
-                color="inherit"
-                onClick={handleInstallClick}
-                sx={{
-                  '&:hover': {
-                    bgcolor: 'rgba(255, 255, 255, 0.1)',
-                  },
-                }}
-              >
-                <GetAppIcon />
-              </IconButton>
+          {/* PWA Install Button */}
+          {!isInstalled && (
+            <Tooltip 
+              title={
+                deferredPrompt 
+                  ? t('header.installApp')
+                  : t('header.installAppHint') || 'Install App (available in production build)'
+              }
+            >
+              <span>
+                <IconButton 
+                  color="inherit"
+                  onClick={handleInstallClick}
+                  disabled={!deferredPrompt}
+                  sx={{
+                    '&:hover': {
+                      bgcolor: 'rgba(255, 255, 255, 0.1)',
+                    },
+                    '&.Mui-disabled': {
+                      opacity: 0.5,
+                    },
+                  }}
+                >
+                  <GetAppIcon />
+                </IconButton>
+              </span>
             </Tooltip>
           )}
 
