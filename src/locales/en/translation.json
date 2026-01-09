@@ -247,8 +247,11 @@
     "installInstructionsMobile": "To install: Tap the browser menu (⋮) and select \"Add to Home Screen\" or \"Install App\"",
     "installInstructionsSafari": "To install: Tap the share button (□↑) and select \"Add to Home Screen\"",
     "installInstructionsDesktop": "To install: Click the install icon (⊕) in the address bar or browser menu (⋮) > \"Install App\"",
-    "installInstructionsFirefox": "To install: Click the install icon in the address bar or browser menu",
-    "installInstructionsGeneric": "To install: Use the browser menu to install the app"
+    "installInstructionsDesktopChrome": "To install on desktop:\n\n1. Look for the install icon (⊕) in the address bar (on the right)\n2. Alternatively: Click the browser menu (⋮) > \"Install App\"\n\nIf the icon doesn't appear, make sure:\n- You're using Chrome or Edge\n- The site is running on HTTPS\n- Service Worker is registered (refresh the page)",
+    "installInstructionsDesktopSafari": "Safari on desktop does not support PWA installation. Please use Chrome or Edge.",
+    "installInstructionsFirefox": "To install: Firefox supports PWA installation. Click the browser menu (☰) > \"Install App\"",
+    "installInstructionsGeneric": "To install: Use the browser menu to install the app. Chrome and Edge support PWA installation on desktop.",
+    "installRequiresHTTPS": "PWA installation requires a secure connection (HTTPS). Please access the site via HTTPS."
   },
   "currency": {
     "usd": "USD - US Dollar",

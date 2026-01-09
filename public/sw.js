@@ -7,26 +7,41 @@ const CACHE_NAME = 'cost-manager-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/static/css/main.css',
-  '/static/js/main.js',
+  '/manifest.json',
   '/icon-192.png',
-  '/icon-512.png',
-  '/manifest.json'
+  '/icon-512.png'
 ];
 
 // Install event - cache assets
 self.addEventListener('install', function(event) {
+  console.log('[SW] Installing service worker...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(function(cache) {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache.map(url => new Request(url, { cache: 'reload' })));
+        console.log('[SW] Opened cache');
+        // Try to cache files, but don't fail if some are missing
+        return Promise.allSettled(
+          urlsToCache.map(function(url) {
+            return fetch(url)
+              .then(function(response) {
+                if (response.ok) {
+                  return cache.put(url, response);
+                }
+              })
+              .catch(function(error) {
+                console.warn('[SW] Failed to cache', url, error);
+              });
+          })
+        );
+      })
+      .then(function() {
+        console.log('[SW] Service worker installed');
+        return self.skipWaiting();
       })
       .catch(function(error) {
-        console.error('Cache install failed:', error);
+        console.error('[SW] Cache install failed:', error);
       })
   );
-  self.skipWaiting();
 });
 
 // Activate event - clean up old caches
@@ -58,6 +73,12 @@ self.addEventListener('fetch', function(event) {
     return;
   }
 
+  // Skip chrome-extension and other protocols
+  if (event.request.url.startsWith('chrome-extension://') || 
+      event.request.url.startsWith('moz-extension://')) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(function(response) {
@@ -69,27 +90,38 @@ self.addEventListener('fetch', function(event) {
         // Clone the request
         const fetchRequest = event.request.clone();
 
-        return fetch(fetchRequest).then(function(response) {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
+        return fetch(fetchRequest)
+          .then(function(response) {
+            // Check if valid response
+            if (!response || response.status !== 200) {
+              // For navigation requests, return index.html for SPA routing
+              if (event.request.mode === 'navigate') {
+                return caches.match('/index.html') || response;
+              }
+              return response;
+            }
+
+            // Only cache same-origin responses
+            if (response.type === 'basic' || response.type === 'cors') {
+              // Clone the response
+              const responseToCache = response.clone();
+
+              caches.open(CACHE_NAME)
+                .then(function(cache) {
+                  cache.put(event.request, responseToCache);
+                });
+            }
+
             return response;
-          }
-
-          // Clone the response
-          const responseToCache = response.clone();
-
-          caches.open(CACHE_NAME)
-            .then(function(cache) {
-              cache.put(event.request, responseToCache);
-            });
-
-          return response;
-        }).catch(function() {
-          // If fetch fails, try to return cached index.html for navigation requests
-          if (event.request.mode === 'navigate') {
-            return caches.match('/index.html');
-          }
-        });
+          })
+          .catch(function() {
+            // If fetch fails, try to return cached index.html for navigation requests (SPA)
+            if (event.request.mode === 'navigate') {
+              return caches.match('/index.html');
+            }
+            // For other requests, return a basic error response
+            return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+          });
       })
   );
 });

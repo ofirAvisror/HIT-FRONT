@@ -247,8 +247,11 @@
     "installInstructionsMobile": "Para instalar: Toca el menú del navegador (⋮) y selecciona \"Agregar a la pantalla de inicio\" o \"Instalar aplicación\"",
     "installInstructionsSafari": "Para instalar: Toca el botón de compartir (□↑) y selecciona \"Agregar a la pantalla de inicio\"",
     "installInstructionsDesktop": "Para instalar: Haz clic en el icono de instalación (⊕) en la barra de direcciones o menú del navegador (⋮) > \"Instalar aplicación\"",
-    "installInstructionsFirefox": "Para instalar: Haz clic en el icono de instalación en la barra de direcciones o menú del navegador",
-    "installInstructionsGeneric": "Para instalar: Usa el menú del navegador para instalar la aplicación"
+    "installInstructionsDesktopChrome": "Para instalar en escritorio:\n\n1. Busca el icono de instalación (⊕) en la barra de direcciones (a la derecha)\n2. Alternativamente: Haz clic en el menú del navegador (⋮) > \"Instalar aplicación\"\n\nSi el icono no aparece, asegúrate de:\n- Estás usando Chrome o Edge\n- El sitio está ejecutándose en HTTPS\n- Service Worker está registrado (actualiza la página)",
+    "installInstructionsDesktopSafari": "Safari en escritorio no admite la instalación de PWA. Por favor, usa Chrome o Edge.",
+    "installInstructionsFirefox": "Para instalar: Firefox admite la instalación de PWA. Haz clic en el menú del navegador (☰) > \"Instalar aplicación\"",
+    "installInstructionsGeneric": "Para instalar: Usa el menú del navegador para instalar la aplicación. Chrome y Edge admiten la instalación de PWA en escritorio.",
+    "installRequiresHTTPS": "La instalación de PWA requiere una conexión segura (HTTPS). Por favor, accede al sitio a través de HTTPS."
   },
   "currency": {
     "usd": "USD - Dólar Estadounidense",

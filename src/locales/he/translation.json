@@ -247,8 +247,11 @@
     "installInstructionsMobile": "להתקנה: לחץ על תפריט הדפדפן (⋮) ובחר \"הוסף למסך הבית\" או \"התקן אפליקציה\"",
     "installInstructionsSafari": "להתקנה: לחץ על כפתור השיתוף (□↑) ובחר \"הוסף למסך הבית\"",
     "installInstructionsDesktop": "להתקנה: לחץ על סמל ההתקנה (⊕) בשורת הכתובת או בתפריט הדפדפן (⋮) > \"התקן אפליקציה\"",
-    "installInstructionsFirefox": "להתקנה: לחץ על סמל ההתקנה בשורת הכתובת או בתפריט הדפדפן",
-    "installInstructionsGeneric": "להתקנה: השתמש בתפריט הדפדפן כדי להתקין את האפליקציה"
+    "installInstructionsDesktopChrome": "להתקנה במחשב:\n\n1. חפש את סמל ההתקנה (⊕) בשורת הכתובת (מימין)\n2. לחלופין: לחץ על תפריט הדפדפן (⋮) > \"התקן אפליקציה\"\n\nאם הסמל לא מופיע, ודא ש:\n- אתה משתמש ב-Chrome או Edge\n- האתר פועל על HTTPS\n- Service Worker רשום (רענן את הדף)",
+    "installInstructionsDesktopSafari": "Safari במחשב לא תומך בהתקנת PWA. אנא השתמש ב-Chrome או Edge.",
+    "installInstructionsFirefox": "להתקנה: Firefox תומך בהתקנת PWA. לחץ על תפריט הדפדפן (☰) > \"התקן את האפליקציה\"",
+    "installInstructionsGeneric": "להתקנה: השתמש בתפריט הדפדפן כדי להתקין את האפליקציה. Chrome ו-Edge תומכים בהתקנת PWA במחשב.",
+    "installRequiresHTTPS": "התקנת PWA דורשת חיבור מאובטח (HTTPS). אנא גש לאתר דרך HTTPS."
   },
   "currency": {
     "usd": "USD - דולר אמריקאי",
