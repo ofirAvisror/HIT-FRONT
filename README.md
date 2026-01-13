@@ -41,7 +41,6 @@ Cost Manager is a modern, feature-rich expense tracking application that helps y
 - **Monthly Reports**: Detailed breakdowns of transactions by month
 - **Pie Charts**: Visual representation of expenses by category
 - **Bar Charts**: Trend analysis over time periods
-- **Area & Line Charts**: Additional visualization options for data analysis
 - **Statistics**: Total expenses, income, savings, and category breakdowns
 
 ### 📈 Budget Management
@@ -81,7 +80,6 @@ Cost Manager is a modern, feature-rich expense tracking application that helps y
 
 ### Core Framework
 - **React 18.2.0**: Modern UI library
-- **React Router DOM 6.20.0**: Client-side routing
 - **Create React App**: Build tooling and development environment
 
 ### UI Framework & Styling
@@ -194,7 +192,9 @@ HIT-FRONT/
 │   ├── manifest.json      # PWA manifest
 │   ├── sw.js             # Service worker
 │   ├── exchange-rates.json # Currency exchange rates
-│   └── icons/            # Application icons
+│   ├── icon.svg          # Application icon (SVG)
+│   ├── icon-192.png      # Application icon (192x192)
+│   └── icon-512.png      # Application icon (512x512)
 ├── src/
 │   ├── components/       # React components
 │   │   ├── AddCostForm.jsx
@@ -214,6 +214,7 @@ HIT-FRONT/
 │   │   └── config.js
 │   ├── lib/             # Utility libraries
 │   │   ├── idb-react.js # IndexedDB wrapper
+│   │   ├── idb.js       # IndexedDB wrapper (vanilla JS version)
 │   │   ├── chartHelpers.js
 │   │   └── exportHelpers.js
 │   ├── locales/         # Translation files
@@ -259,7 +260,7 @@ Advanced filtering interface for transactions.
 Central hub for viewing and managing notifications.
 
 ### Settings
-Application settings including theme and language preferences.
+Application settings for configuring exchange rate URL. Theme and language preferences are managed from the Header component.
 
 ## Database Schema
 
@@ -368,9 +369,6 @@ Starts the development server at `http://localhost:3000`
 
 ### `npm run build`
 Creates an optimized production build in the `build/` directory
-
-### `npm test`
-Runs the test suite (if configured)
 
 ### `npm run generate-icons`
 Generates application icons for PWA (runs automatically before build)
